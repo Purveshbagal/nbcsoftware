@@ -16,9 +16,9 @@ The Android configuration currently signs release builds with the debug key. Con
 The mobile API can now be set at build time:
 
 ```sh
-flutter build appbundle --release --dart-define=API_BASE_URL=https://YOUR_DOMAIN/api
+flutter build appbundle --release --dart-define=API_BASE_URL=https://app.nbcpedia.com/api
 ```
 
-Replace YOUR_DOMAIN with the deployed backend. Without this option, development uses the Android emulator host or localhost. The debug APK is for testing and is not a production release.
+The default API is https://app.nbcpedia.com/api. Use API_BASE_URL only to override it for development or staging. The debug APK is for testing and is not a production release.
 
 Verify registration, approval, payment and sign-out workflows with real admin/field accounts against the intended backend before deployment. The manual API smoke test is skipped unless explicitly enabled with a live backend.
