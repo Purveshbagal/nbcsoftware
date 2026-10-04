@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:admin": "node scripts/seed-admin.mjs",
-    "test:db": "node scripts/test-db.mjs"
+    "test:db": "node scripts/test-db.mjs",
+    "migrate:atlas": "node scripts/migrate-local-to-atlas.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
