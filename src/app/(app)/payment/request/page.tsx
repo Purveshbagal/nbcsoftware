@@ -2,6 +2,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { NewPaymentDialog } from "@/components/new-payment-dialog";
 import { PaymentsTable } from "@/components/payments-table";
 import { connectToDatabase } from "@/lib/mongodb";
+import { ensureProductCatalog } from "@/lib/product-catalog";
 import { serializePayment } from "@/lib/serialize-payment";
 import { serializeProduct } from "@/lib/serialize-product";
 import { serializeRegistration } from "@/lib/serialize-registration";
@@ -11,6 +12,7 @@ import RegistrationModel from "@/models/Registration";
 
 export default async function PaymentRequestPage() {
   await connectToDatabase();
+  await ensureProductCatalog();
   const [payments, approvedRegistrations, products] = await Promise.all([
     PaymentModel.find().sort({ createdAt: -1 }).lean(),
     RegistrationModel.find({ status: "approved" }).sort({ doctorName: 1 }).lean(),
