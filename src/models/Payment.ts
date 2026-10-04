@@ -39,6 +39,12 @@ const paymentSchema = new Schema(
       username: { type: String },
       name: { type: String },
     },
+    /** Set when the field rep records handing the cash over to the doctor. */
+    handedOverAt: { type: Date },
+    handedOverBy: {
+      username: { type: String },
+      name: { type: String },
+    },
   },
   { timestamps: true }
 );

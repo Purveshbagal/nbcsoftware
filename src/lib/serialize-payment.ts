@@ -28,5 +28,7 @@ export function serializePayment(doc: LeanPayment): PaymentRecord {
     netAmount: doc.netAmount ?? undefined,
     paidAt: doc.paidAt ?? null,
     paidBy: doc.paidBy ?? undefined,
+    handedOverAt: doc.handedOverAt ?? null,
+    handedOverBy: doc.handedOverBy ?? undefined,
   };
 }

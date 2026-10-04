@@ -22,4 +22,6 @@ export type PaymentRecord = {
   netAmount?: number;
   paidAt?: Date | string | null;
   paidBy?: { username?: string | null; name?: string | null };
+  handedOverAt?: Date | string | null;
+  handedOverBy?: { username?: string | null; name?: string | null };
 };

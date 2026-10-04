@@ -38,8 +38,9 @@ export async function POST(
     );
   }
 
-  const isOwner = payment.requestedBy?.username === session.username;
-  if (session.role !== "admin" && !isOwner) {
+  // Only an admin disburses and generates the receipt; the field rep then
+  // records handing the cash to the doctor via the hand-over route.
+  if (session.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

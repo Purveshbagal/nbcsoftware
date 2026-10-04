@@ -20,6 +20,16 @@ function formatDate(value?: Date | string | null) {
   });
 }
 
+function statusOf(payment: PaymentRecord) {
+  if (payment.handedOverAt) {
+    return { label: "Given to Doctor", variant: "default" as const };
+  }
+  if (payment.paidAt) {
+    return { label: "Receipt Generated", variant: "outline" as const };
+  }
+  return { label: "Pending Payment", variant: "secondary" as const };
+}
+
 export function GivePaymentTable({ payments }: { payments: PaymentRecord[] }) {
   if (payments.length === 0) {
     return (
@@ -50,6 +60,7 @@ export function GivePaymentTable({ payments }: { payments: PaymentRecord[] }) {
             <TableHead>Receipt No.</TableHead>
             <TableHead>Given By</TableHead>
             <TableHead>Paid On</TableHead>
+            <TableHead>Given to Doctor</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,8 +80,8 @@ export function GivePaymentTable({ payments }: { payments: PaymentRecord[] }) {
                 {payment.paidAt ? `₹${(payment.netAmount ?? payment.amount).toLocaleString("en-IN")}` : "-"}
               </TableCell>
               <TableCell>
-                <Badge variant={payment.paidAt ? "default" : "secondary"}>
-                  {payment.paidAt ? "Paid" : "Pending Payment"}
+                <Badge variant={statusOf(payment).variant}>
+                  {statusOf(payment).label}
                 </Badge>
               </TableCell>
               <TableCell className="font-mono text-xs">
@@ -89,6 +100,22 @@ export function GivePaymentTable({ payments }: { payments: PaymentRecord[] }) {
                   >
                     {formatDate(payment.paidAt)}
                   </a>
+                ) : (
+                  "-"
+                )}
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {payment.handedOverAt ? (
+                  <>
+                    {formatDate(payment.handedOverAt)}
+                    {payment.handedOverBy?.name && (
+                      <span className="block text-xs">
+                        by {payment.handedOverBy.name}
+                      </span>
+                    )}
+                  </>
+                ) : payment.paidAt ? (
+                  "Pending"
                 ) : (
                   "-"
                 )}
