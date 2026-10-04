@@ -1,0 +1,431 @@
+import type { CrudOptions } from "@/lib/sfa-crud";
+
+/**
+ * The writable shape of every field-force entity, shared by the API routes and
+ * the forms. Keeping them together means a new field is added in one place.
+ */
+
+export const doctorCrud: CrudOptions = {
+  label: "Doctor",
+  required: ["name"],
+  sort: { createdAt: -1 },
+  searchFields: ["name", "doctorCode", "hospitalName", "city", "contactNo", "registrationNumber"],
+  filters: {
+    division: "division",
+    zone: "zone",
+    speciality: "speciality",
+    category: "category",
+    city: "city",
+  },
+  fields: {
+    doctorCode: "string",
+    prefix: "string",
+    name: "string",
+    hospitalName: "string",
+    gender: "string",
+    contactNo: "string",
+    email: "string",
+    dateOfBirth: "string",
+    anniversary: "string",
+    maritalStatus: "string",
+    qualification: "string",
+    registrationNumber: "string",
+    state: "string",
+    district: "string",
+    city: "string",
+    pincode: "string",
+    clinicAddress: "string",
+    division: "string",
+    zone: "string",
+    speciality: "string",
+    category: "string",
+    doctorType: "string",
+    approxBusiness: "string",
+    assignedEmployees: "stringArray",
+    firms: "stringArray",
+    isActive: "boolean",
+  },
+};
+
+export const employeeCrud: CrudOptions = {
+  label: "Employee",
+  required: ["name"],
+  sort: { createdAt: -1 },
+  searchFields: ["name", "code", "email", "contactNo", "city"],
+  filters: { division: "division", zone: "zone", designation: "designation" },
+  fields: {
+    code: "string",
+    name: "string",
+    email: "string",
+    contactNo: "string",
+    workType: "string",
+    assignTo: "string",
+    city: "string",
+    state: "string",
+    address: "string",
+    division: "string",
+    zone: "string",
+    designation: "string",
+    reportingTo: "string",
+    dateOfBirth: "string",
+    dateOfJoin: "string",
+    dateOfResignation: "string",
+    inactiveDate: "string",
+    inactiveReason: "string",
+    isActive: "boolean",
+  },
+};
+
+export const firmCrud: CrudOptions = {
+  label: "Firm",
+  required: ["name"],
+  sort: { createdAt: -1 },
+  searchFields: ["name", "firmCode", "contactPerson", "contactNo", "city", "gstin"],
+  filters: {
+    division: "division",
+    zone: "zone",
+    firmType: "firmType",
+    firmCategory: "firmCategory",
+    city: "city",
+  },
+  fields: {
+    firmCode: "string",
+    name: "string",
+    firmType: "string",
+    firmCategory: "string",
+    contactPerson: "string",
+    contactNo: "string",
+    email: "string",
+    city: "string",
+    district: "string",
+    state: "string",
+    zone: "string",
+    division: "string",
+    additionalDivisions: "stringArray",
+    address: "string",
+    pincode: "string",
+    assignedEmployees: "stringArray",
+    firstLevelManager: "string",
+    secondLevelManager: "string",
+    thirdLevelManager: "string",
+    dateOfBirth: "string",
+    approxBusiness: "string",
+    transportType: "string",
+    distributorCode: "string",
+    stockistCode: "string",
+    customerCode: "string",
+    gstin: "string",
+    panNumber: "string",
+    drugLicenseNumber: "string",
+    foodLicenseNumber: "string",
+    bankName: "string",
+    branchName: "string",
+    accountNumber: "string",
+    ifsc: "string",
+    isActive: "boolean",
+  },
+};
+
+const visitFields: CrudOptions["fields"] = {
+  visitCode: "string",
+  doctor: "string",
+  firm: "string",
+  clinicAddress: "string",
+  city: "string",
+  zone: "string",
+  division: "string",
+  employeeName: "string",
+  visitDate: "string",
+  callObjective: "string",
+  postCallInfo: "string",
+  remarks: "string",
+  products: "stringArray",
+  samples: "stringArray",
+  gifts: "stringArray",
+  pobValue: "number",
+  skippedReason: "string",
+  status: "string",
+};
+
+export const doctorVisitCrud: CrudOptions = {
+  label: "Visit",
+  required: ["visitDate"],
+  sort: { visitDate: -1 },
+  defaults: { visitType: "doctor" },
+  searchFields: ["doctor", "employeeName", "city", "visitCode"],
+  filters: { status: "status", zone: "zone", division: "division", employeeName: "employeeName" },
+  fields: visitFields,
+};
+
+export const firmVisitCrud: CrudOptions = {
+  ...doctorVisitCrud,
+  defaults: { visitType: "firm" },
+  searchFields: ["firm", "employeeName", "city", "visitCode"],
+};
+
+export const expenseCrud: CrudOptions = {
+  label: "Expense",
+  required: ["employeeName", "expenseDate"],
+  sort: { expenseDate: -1 },
+  searchFields: ["employeeName", "head", "fromCity", "toCity"],
+  filters: { status: "status", zone: "zone", division: "division", employeeName: "employeeName" },
+  fields: {
+    employeeName: "string",
+    zone: "string",
+    division: "string",
+    expenseDate: "string",
+    head: "string",
+    modeOfTravel: "string",
+    fromCity: "string",
+    toCity: "string",
+    distanceKm: "number",
+    fare: "number",
+    otherAmount: "number",
+    remarks: "string",
+    status: "string",
+    reviewedBy: "string",
+  },
+};
+
+export const leaveCrud: CrudOptions = {
+  label: "Leave",
+  required: ["employeeName", "fromDate", "toDate"],
+  sort: { fromDate: -1 },
+  searchFields: ["employeeName", "leaveType", "reason"],
+  filters: { status: "status", zone: "zone", employeeName: "employeeName" },
+  fields: {
+    employeeName: "string",
+    zone: "string",
+    leaveType: "string",
+    reason: "string",
+    fromDate: "string",
+    toDate: "string",
+    days: "number",
+    status: "string",
+    reviewedBy: "string",
+  },
+};
+
+export const holidayCrud: CrudOptions = {
+  label: "Calendar entry",
+  required: ["date"],
+  sort: { date: 1 },
+  searchFields: ["occasion", "zone", "employeeName"],
+  filters: { calendarType: "calendarType", zone: "zone" },
+  fields: {
+    calendarType: "string",
+    zone: "string",
+    employeeName: "string",
+    date: "string",
+    occasion: "string",
+  },
+};
+
+export const orderCrud: CrudOptions = {
+  label: "Order",
+  required: ["orderDate"],
+  sort: { orderDate: -1 },
+  searchFields: ["orderNo", "firm", "doctor", "employeeName"],
+  filters: { status: "status", zone: "zone", division: "division", firm: "firm" },
+  fields: {
+    orderNo: "string",
+    orderDate: "string",
+    firm: "string",
+    doctor: "string",
+    employeeName: "string",
+    zone: "string",
+    division: "string",
+    remarks: "string",
+    status: "string",
+  },
+};
+
+export const targetCrud: CrudOptions = {
+  label: "Target",
+  required: ["targetType"],
+  sort: { year: -1, month: -1 },
+  searchFields: ["subject", "employeeName"],
+  filters: { targetType: "targetType", year: "year", month: "month", employeeName: "employeeName" },
+  fields: {
+    targetType: "string",
+    subject: "string",
+    employeeName: "string",
+    frequency: "string",
+    month: "string",
+    quarter: "string",
+    year: "string",
+    pobValue: "number",
+    secondarySales: "number",
+    doctorVisits: "number",
+    chemistVisits: "number",
+    newDoctorAddition: "number",
+    newChemistAddition: "number",
+    primarySalesValue: "number",
+    primarySalesQty: "number",
+  },
+};
+
+export const reminderCrud: CrudOptions = {
+  label: "Reminder",
+  required: ["title", "date"],
+  sort: { date: 1 },
+  searchFields: ["title", "assignedTo", "notes"],
+  filters: { status: "status", assignedTo: "assignedTo" },
+  fields: {
+    title: "string",
+    date: "string",
+    assignedTo: "string",
+    notes: "string",
+    status: "string",
+  },
+};
+
+export const supportTicketCrud: CrudOptions = {
+  label: "Ticket",
+  required: ["subject"],
+  sort: { createdAt: -1 },
+  searchFields: ["ticketNo", "subject", "description", "raisedBy"],
+  filters: { status: "status", priority: "priority" },
+  fields: {
+    ticketNo: "string",
+    subject: "string",
+    description: "string",
+    raisedBy: "string",
+    priority: "string",
+    status: "string",
+    response: "string",
+  },
+};
+
+export const fareChartCrud: CrudOptions = {
+  label: "Route",
+  required: ["routeName"],
+  sort: { createdAt: -1 },
+  searchFields: ["routeName", "citiesInRoute", "zone", "designation"],
+  filters: { zone: "zone", division: "division", designation: "designation" },
+  fields: {
+    routeName: "string",
+    citiesInRoute: "string",
+    zone: "string",
+    division: "string",
+    routeFor: "string",
+    designation: "string",
+    mode: "string",
+    distanceKm: "number",
+    fare: "number",
+    isApproved: "boolean",
+  },
+};
+
+export const administratorCrud: CrudOptions = {
+  label: "Administrator",
+  required: ["name"],
+  sort: { createdAt: -1 },
+  searchFields: ["name", "email", "contactNo", "city"],
+  filters: { division: "division", zone: "zone", adminType: "adminType" },
+  fields: {
+    name: "string",
+    email: "string",
+    contactNo: "string",
+    city: "string",
+    division: "string",
+    zone: "string",
+    adminType: "string",
+    isActive: "boolean",
+  },
+};
+
+export const sfaProductCrud: CrudOptions = {
+  label: "Product",
+  required: ["name"],
+  sort: { name: 1 },
+  searchFields: ["name", "code", "composition", "productGroup"],
+  filters: { division: "division", productGroup: "productGroup" },
+  fields: {
+    code: "string",
+    name: "string",
+    composition: "string",
+    pack: "string",
+    division: "string",
+    productGroup: "string",
+    indication: "string",
+    uom: "string",
+    mrp: "number",
+    ptr: "number",
+    pts: "number",
+    qrCode: "string",
+    isActive: "boolean",
+  },
+};
+
+export const monthMaintenanceCrud: CrudOptions = {
+  label: "Month",
+  required: ["month", "year"],
+  sort: { year: -1, month: -1 },
+  searchFields: ["month", "year"],
+  filters: { scope: "scope", year: "year" },
+  fields: {
+    scope: "string",
+    month: "string",
+    year: "string",
+    submitDeadline: "string",
+    approvalDeadline: "string",
+    isLocked: "boolean",
+    hiddenForEmployee: "boolean",
+  },
+};
+
+export const entitlementCrud: CrudOptions = {
+  label: "Entitlement",
+  required: ["leaveType"],
+  sort: { createdAt: -1 },
+  searchFields: ["employeeName", "designation", "leaveType"],
+  filters: { designation: "designation", year: "year", employeeName: "employeeName" },
+  fields: {
+    employeeName: "string",
+    designation: "string",
+    leaveType: "string",
+    year: "string",
+    entitledDays: "number",
+    carryForward: "number",
+    isActive: "boolean",
+  },
+};
+
+export const sampleRequestCrud: CrudOptions = {
+  label: "Request",
+  required: ["requestDate"],
+  sort: { requestDate: -1 },
+  searchFields: ["requestNo", "employeeName", "item"],
+  filters: { status: "status", itemType: "itemType", zone: "zone", employeeName: "employeeName" },
+  fields: {
+    requestNo: "string",
+    requestDate: "string",
+    employeeName: "string",
+    zone: "string",
+    division: "string",
+    itemType: "string",
+    item: "string",
+    quantity: "number",
+    remarks: "string",
+    status: "string",
+  },
+};
+
+export const mediaAssetCrud: CrudOptions = {
+  label: "Item",
+  required: ["title"],
+  sort: { createdAt: -1 },
+  searchFields: ["title", "description", "campaign"],
+  filters: { kind: "kind", division: "division", campaign: "campaign" },
+  fields: {
+    kind: "string",
+    title: "string",
+    description: "string",
+    url: "string",
+    fileType: "string",
+    division: "string",
+    campaign: "string",
+    isActive: "boolean",
+  },
+};

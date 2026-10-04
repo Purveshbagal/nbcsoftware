@@ -1,0 +1,27 @@
+export type PaymentRecord = {
+  _id: string;
+  doctorId: string;
+  doctorName: string;
+  productId: string;
+  productName: string;
+  productComposition?: string;
+  amount: number;
+  purpose?: string;
+  status: "pending" | "approved" | "rejected";
+  requestedBy?: { username?: string | null; name?: string | null };
+  reviewedBy?: { username?: string | null; name?: string | null };
+  reviewedAt?: Date | string | null;
+  createdAt?: Date | string;
+  surveyFormNo?: string;
+  surveyDownloadedAt?: Date | string | null;
+  surveyUploaded?: boolean;
+  surveyUploadedAt?: Date | string | null;
+  receiptNumber?: string;
+  transactionRefNumber?: string;
+  tdsAmount?: number;
+  netAmount?: number;
+  paidAt?: Date | string | null;
+  paidBy?: { username?: string | null; name?: string | null };
+  handedOverAt?: Date | string | null;
+  handedOverBy?: { username?: string | null; name?: string | null };
+};
