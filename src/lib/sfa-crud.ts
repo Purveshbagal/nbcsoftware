@@ -59,7 +59,7 @@ function pickFields(body: Record<string, unknown>, fields: FieldSpec, all: boole
   return out;
 }
 
-async function requireAdmin(request: Request) {
+export async function requireAdmin(request: Request) {
   const session = await getSessionFromRequest(request);
   if (!session) {
     return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };

@@ -40,5 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# flutter mobile app (tracked separately)
-/mobile/
+# flutter mobile apps: build output and local logs
+/mobile*/build/
+/mobile*/android/build/
+/mobile*/build-apk.log
+/mobile*/flutter_*.log
+/mobile*/android/hs_err_pid*.log
+/mobile*/android/replay_pid*.log
+/mobile*/android/.kotlin/

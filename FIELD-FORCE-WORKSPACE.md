@@ -64,9 +64,27 @@ They need either a storage backend (Files), a module of their own
 (PayRoll, Insurance, Accounting), or a data model that has no equivalent yet
 (Stock Tally).
 
-Beyond those, the source app also has geo-tracking of field staff, attendance
-capture from the phone, and offline sync — all of which belong to the mobile
-app rather than this admin UI.
+## Employee mobile app
+
+Field staff use a separate Android app, **NBC Labs** ([mobile-labs/](mobile-labs/README.md)),
+which is not related to the NBC Pedia app in `mobile/`. It calls its own API
+under `/api/labs/*`:
+
+- **Sign-in** — the app login (login ID + password) lives on the Employee
+  record and is set under People → Mobile App Access. Employee tokens are signed
+  with a key derived from `AUTH_SECRET` and their own audience
+  ([src/lib/labs-auth.ts](src/lib/labs-auth.ts)), so they are rejected by every
+  admin and NBC Pedia route, and admin tokens are rejected by `/api/labs`.
+  Each request re-reads the employee, so disabling access takes effect at once.
+- **Scoping** — every `/api/labs` route reads and writes only the signed-in
+  employee's own rows, stamps their name, zone and division, and forces review
+  fields (`status`) to pending. See [src/lib/labs-crud.ts](src/lib/labs-crud.ts).
+- **Attendance** — `Attendance` model, one row per employee per India-time day.
+  Shown under HR Portal → Attendance.
+- **Tracking** — `LocationPing` model (auto-deleted after 180 days) plus
+  `Employee.lastLocation`. Shown under Live Tracking (Leaflet + OpenStreetMap,
+  no API key): everyone's last position, and any employee's route for a day
+  with punch-in/out and visit pins. Visits logged from the app carry `geo`.
 
 ## Checks
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NBC Labs launcher mark: a lab flask, centred in the adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Flask outline -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M45,32 L63,32 L63,36 L60,36 L60,50 L74,72 C76,75.5 74,79 70,79 L38,79 C34,79 32,75.5 34,72 L48,50 L48,36 L45,36 Z" />
+    <!-- Liquid -->
+    <path
+        android:fillColor="#34D399"
+        android:pathData="M41.5,66 L66.5,66 L71,73.2 C71.6,74.3 71,75 69.8,75 L38.2,75 C37,75 36.4,74.3 37,73.2 Z" />
+    <!-- Bubbles -->
+    <path
+        android:fillColor="#3F3DBC"
+        android:pathData="M52,58 m-2.5,0 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0 M58,62 m-1.6,0 a1.6,1.6 0 1,0 3.2,0 a1.6,1.6 0 1,0 -3.2,0" />
+</vector>

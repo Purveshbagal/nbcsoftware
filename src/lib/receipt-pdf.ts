@@ -88,7 +88,7 @@ export async function generateReceiptPdf(
   y -= 4;
 
   drawLine(
-    `We Have done the payment of Rs. ${formatAmount(input.amount)}/- via NEFT /RTGS with REF No. ${input.transactionRefNumber} Dated ${formatDate(input.paidAt)} in favouring name of ${input.paidToName}.`
+    `We Have done the payment of Rs. ${formatAmount(input.netAmount)}/- via NEFT /RTGS with REF No. ${input.transactionRefNumber} Dated ${formatDate(input.paidAt)} in favouring name of ${input.paidToName}.`
   );
   y -= 4;
 

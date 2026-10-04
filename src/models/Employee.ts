@@ -26,11 +26,33 @@ const employeeSchema = new Schema(
 
     isActive: { type: Boolean, default: true },
     createdBy: { username: String, name: String },
+
+    // NBC Labs mobile app sign-in. Kept apart from the User model on purpose:
+    // NBC Pedia accounts cannot sign in to this app, and the other way round.
+    appUsername: { type: String, trim: true, lowercase: true },
+    /** Never returned by a query unless asked for with `+appPasswordHash`. */
+    appPasswordHash: { type: String, select: false },
+    appAccessEnabled: { type: Boolean, default: false },
+
+    /** Last position the app reported, so the live map needs no aggregation. */
+    lastLocation: {
+      lat: Number,
+      lng: Number,
+      accuracy: Number,
+      battery: Number,
+      at: Date,
+    },
+    lastSeenAt: { type: Date },
+    deviceInfo: { type: String, trim: true },
   },
   { timestamps: true }
 );
 
 employeeSchema.index({ name: 1 });
+employeeSchema.index(
+  { appUsername: 1 },
+  { unique: true, partialFilterExpression: { appUsername: { $type: "string" } } }
+);
 
 export type Employee = InferSchemaType<typeof employeeSchema>;
 

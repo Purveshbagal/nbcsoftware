@@ -27,6 +27,13 @@ const visitSchema = new Schema(
     pobValue: { type: Number },
     skippedReason: { type: String, trim: true },
 
+    // Set when the visit is logged from the NBC Labs mobile app.
+    employeeId: { type: Schema.Types.ObjectId, ref: "Employee" },
+    geo: { lat: Number, lng: Number, accuracy: Number },
+    checkInAt: { type: Date },
+    checkOutAt: { type: Date },
+    source: { type: String, enum: ["web", "app"], default: "web" },
+
     status: {
       type: String,
       enum: ["planned", "closed", "skipped", "open"],

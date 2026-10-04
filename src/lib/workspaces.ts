@@ -17,6 +17,7 @@ import {
   ListChecks,
   MapPin,
   MonitorPlay,
+  Navigation,
   Package,
   QrCode,
   Receipt,
@@ -162,8 +163,10 @@ const fieldForceGroups: NavGroup[] = [
           { title: "Doctors", url: "/sfa/people/doctors" },
           { title: "Employees", url: "/sfa/people/employees" },
           { title: "Administrators", url: "/sfa/people/administrators" },
+          { title: "Mobile App Access", url: "/sfa/people/app-access" },
         ],
       },
+      { title: "Live Tracking", url: "/sfa/tracking", icon: Navigation },
       {
         title: "Calendar",
         icon: CalendarDays,
@@ -224,6 +227,7 @@ const fieldForceGroups: NavGroup[] = [
         title: "HR Portal",
         icon: UserSearch,
         items: [
+          { title: "Attendance", url: "/sfa/hr/attendance" },
           { title: "Entitlements", url: "/sfa/hr/entitlements" },
           { title: "Leave Management", url: "/sfa/hr/leave" },
           { title: "Leave Report", url: "/sfa/hr/leave-report" },

@@ -18,7 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { istDateKey } from "@/lib/labs-auth";
 import { connectToDatabase } from "@/lib/mongodb";
+import AttendanceModel from "@/models/Attendance";
 import DoctorModel from "@/models/Doctor";
 import EmployeeModel from "@/models/Employee";
 import ExpenseModel from "@/models/Expense";
@@ -44,6 +46,7 @@ export default async function FieldForceDashboard() {
     closedThisMonth,
     closedToday,
     recentVisits,
+    onDutyToday,
   ] = await Promise.all([
     EmployeeModel.countDocuments({ isActive: true }),
     DoctorModel.countDocuments({ isActive: true }),
@@ -68,6 +71,7 @@ export default async function FieldForceDashboard() {
           status?: string;
         }[]
       >(),
+    AttendanceModel.countDocuments({ date: istDateKey(), "punchIn.at": { $exists: true } }),
   ]);
 
   const expenseTotal = approvedThisMonth[0]?.total ?? 0;
@@ -144,7 +148,21 @@ export default async function FieldForceDashboard() {
         ))}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Link
+          href="/sfa/tracking"
+          className="focus-visible:outline-primary rounded-xl outline-offset-4 transition-transform hover:-translate-y-1 focus-visible:outline-2"
+        >
+          <Card className="h-full py-6">
+            <CardHeader>
+              <CardDescription>Punched in today</CardDescription>
+              <CardTitle className="mt-2 text-3xl font-semibold tabular-nums">
+                {onDutyToday.toLocaleString("en-IN")}
+              </CardTitle>
+              <p className="text-muted-foreground mt-2 text-xs">Open live tracking</p>
+            </CardHeader>
+          </Card>
+        </Link>
         <Card className="py-6">
           <CardHeader>
             <CardDescription>Closed calls this month</CardDescription>
