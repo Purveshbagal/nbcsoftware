@@ -20,10 +20,11 @@ function apiKey() {
   return key;
 }
 
+/** The "verification" WhatsApp template from the Smart OTP dashboard. */
+const DEFAULT_OTP_ID = "3a79a1d65b";
+
 function otpId() {
-  const id = process.env.FAST2SMS_OTP_ID;
-  if (!id) throw new Fast2SmsError("FAST2SMS_OTP_ID is not configured");
-  return id;
+  return process.env.FAST2SMS_OTP_ID || DEFAULT_OTP_ID;
 }
 
 /** Reduce any stored mobile number to the 10-digit form Fast2SMS expects. */
