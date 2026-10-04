@@ -1,6 +1,5 @@
 import "dart:async";
 
-import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 
 import "../models/payment.dart";
@@ -15,9 +14,9 @@ String _formatDate(DateTime? value) {
   return "${two(local.day)}/${two(local.month)}/${local.year}";
 }
 
-/// Lists payments the admin has disbursed (receipt generated) and lets the
-/// rep record handing the cash to the doctor. Receipt generation itself
-/// happens only on the admin's desktop.
+/// Lets the rep record handing admin-disbursed cash to the doctor, confirmed
+/// by an OTP sent to the doctor's WhatsApp, and lists the payments the rep
+/// has given. Receipts are downloaded from the Survey tab, not here.
 class GivePaymentScreen extends StatefulWidget {
   final ApiClient apiClient;
 
@@ -28,14 +27,18 @@ class GivePaymentScreen extends StatefulWidget {
 }
 
 class _GivePaymentScreenState extends State<GivePaymentScreen> {
-  List<Payment> _disbursed = [];
+  List<Payment> _payments = [];
   bool _loading = true;
-  final Set<String> _downloading = {};
   String? _error;
   Timer? _pollTimer;
 
   List<Payment> get _readyToGive =>
-      _disbursed.where((p) => p.readyToHandOver).toList();
+      _payments.where((p) => p.readyToHandOver).toList();
+
+  /// Only payments the rep has handed over from the app, newest first.
+  List<Payment> get _given =>
+      _payments.where((p) => p.handedOverToDoctor).toList()
+        ..sort((a, b) => b.handedOverAt!.compareTo(a.handedOverAt!));
 
   @override
   void initState() {
@@ -56,7 +59,7 @@ class _GivePaymentScreenState extends State<GivePaymentScreen> {
       final payments = await widget.apiClient.fetchPayments();
       if (!mounted) return;
       setState(() {
-        _disbursed = payments.where((p) => p.paymentGiven).toList();
+        _payments = payments;
         _error = null;
       });
     } catch (e) {
@@ -83,35 +86,6 @@ class _GivePaymentScreenState extends State<GivePaymentScreen> {
     }
   }
 
-  Future<void> _downloadReceipt(Payment payment) async {
-    setState(() => _downloading.add(payment.id));
-    try {
-      final bytes = await widget.apiClient.downloadReceiptPdf(payment.id);
-      final savedPath = await FilePicker.saveFile(
-        dialogTitle: "Save receipt",
-        fileName: "receipt-${payment.receiptNumber ?? payment.id}.pdf",
-        type: FileType.custom,
-        allowedExtensions: ["pdf"],
-        bytes: bytes,
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            savedPath == null ? "Download cancelled" : "Receipt downloaded",
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Failed to download: $e")));
-    } finally {
-      if (mounted) setState(() => _downloading.remove(payment.id));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -119,6 +93,7 @@ class _GivePaymentScreenState extends State<GivePaymentScreen> {
     }
 
     final theme = Theme.of(context);
+    final given = _given;
 
     return RefreshIndicator(
       onRefresh: () => _load(),
@@ -157,46 +132,31 @@ class _GivePaymentScreenState extends State<GivePaymentScreen> {
             Text(_error!, style: const TextStyle(color: Colors.red)),
           ],
           const SizedBox(height: 16),
-          if (_disbursed.isEmpty)
+          if (given.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: Text(
-                  "No payments yet. Doctors appear here once the admin "
-                  "gives the payment and generates the receipt.",
+                  "No payments given yet. Payments you give to doctors "
+                  "from the app appear here.",
                   textAlign: TextAlign.center,
                 ),
               ),
             )
           else
-            ..._disbursed.map((payment) {
-              final isDownloading = _downloading.contains(payment.id);
-              final givenLabel = payment.handedOverToDoctor
-                  ? "Given to doctor on ${_formatDate(payment.handedOverAt)}"
-                  : "Pending — give to doctor";
-              return Card(
+            ...given.map(
+              (payment) => Card(
                 child: ListTile(
                   isThreeLine: true,
                   title: Text(payment.doctorName),
                   subtitle: Text(
                     "Receipt ${payment.receiptNumber ?? "-"} · "
                     "₹${payment.netAmount ?? payment.amount} net\n"
-                    "$givenLabel",
+                    "Given to doctor on ${_formatDate(payment.handedOverAt)}",
                   ),
-                  trailing: isDownloading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.download),
-                          tooltip: "Download receipt",
-                          onPressed: () => _downloadReceipt(payment),
-                        ),
                 ),
-              );
-            }),
+              ),
+            ),
         ],
       ),
     );
@@ -214,9 +174,13 @@ class _GiveSheet extends StatefulWidget {
 }
 
 class _GiveSheetState extends State<_GiveSheet> {
+  final _otpController = TextEditingController();
   String? _selectedId;
   bool _submitting = false;
   String? _error;
+
+  /// Masked doctor number the OTP was sent to; null until "Give" is tapped.
+  String? _otpSentTo;
 
   Payment? get _selected {
     for (final p in widget.payments) {
@@ -225,7 +189,13 @@ class _GiveSheetState extends State<_GiveSheet> {
     return null;
   }
 
-  Future<void> _give() async {
+  @override
+  void dispose() {
+    _otpController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendOtp() async {
     final id = _selectedId;
     if (id == null) return;
 
@@ -234,7 +204,33 @@ class _GiveSheetState extends State<_GiveSheet> {
       _error = null;
     });
     try {
-      await widget.apiClient.handOverPayment(id);
+      final sentTo = await widget.apiClient.sendHandOverOtp(id);
+      if (!mounted) return;
+      _otpController.clear();
+      setState(() => _otpSentTo = sentTo);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _verifyAndGive() async {
+    final id = _selectedId;
+    final otp = _otpController.text.trim();
+    if (id == null) return;
+    if (otp.isEmpty) {
+      setState(() => _error = "Enter the OTP sent to the doctor's WhatsApp");
+      return;
+    }
+
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+    try {
+      await widget.apiClient.handOverPayment(id, otp);
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
@@ -249,6 +245,7 @@ class _GiveSheetState extends State<_GiveSheet> {
   Widget build(BuildContext context) {
     final selected = _selected;
     final payments = widget.payments;
+    final otpSentTo = _otpSentTo;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -298,7 +295,12 @@ class _GiveSheetState extends State<_GiveSheet> {
                   : null,
               onChanged: payments.isEmpty || _submitting
                   ? null
-                  : (value) => setState(() => _selectedId = value),
+                  : (value) => setState(() {
+                      // A new doctor needs a fresh OTP.
+                      _selectedId = value;
+                      _otpSentTo = null;
+                      _error = null;
+                    }),
             ),
             const SizedBox(height: 12),
             _ReadOnlyField(
@@ -324,13 +326,43 @@ class _GiveSheetState extends State<_GiveSheet> {
             ),
             const SizedBox(height: 12),
             _ReadOnlyField(label: "Date", value: _formatDate(DateTime.now())),
+            if (otpSentTo != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                "OTP sent to the doctor's WhatsApp ($otpSentTo).",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _otpController,
+                enabled: !_submitting,
+                keyboardType: TextInputType.number,
+                maxLength: 8,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: "OTP",
+                  border: OutlineInputBorder(),
+                  counterText: "",
+                ),
+                onSubmitted: (_) => _verifyAndGive(),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _submitting ? null : _sendOtp,
+                  child: const Text("Resend OTP"),
+                ),
+              ),
+            ],
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: const TextStyle(color: Colors.red)),
             ],
             const SizedBox(height: 20),
             FilledButton(
-              onPressed: (selected == null || _submitting) ? null : _give,
+              onPressed: (selected == null || _submitting)
+                  ? null
+                  : (otpSentTo == null ? _sendOtp : _verifyAndGive),
               child: _submitting
                   ? const SizedBox(
                       width: 20,
@@ -340,7 +372,7 @@ class _GiveSheetState extends State<_GiveSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text("Give"),
+                  : Text(otpSentTo == null ? "Give" : "Verify & Give"),
             ),
           ],
         ),

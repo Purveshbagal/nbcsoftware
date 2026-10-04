@@ -123,11 +123,23 @@ class ApiClient {
     return Payment.fromJson(data["payment"] as Map<String, dynamic>);
   }
 
+  /// Sends an OTP to the doctor's WhatsApp number. Returns the masked number.
+  Future<String> sendHandOverOtp(String paymentId) async {
+    final res = await http.post(
+      Uri.parse("$apiBaseUrl/payments/$paymentId/hand-over/send-otp"),
+      headers: _headers,
+    );
+    final data = _decode(res);
+    return data["sentTo"] as String? ?? "";
+  }
+
   /// Records that the rep has handed the admin-disbursed cash to the doctor.
-  Future<Payment> handOverPayment(String paymentId) async {
+  /// [otp] is the code the doctor received on WhatsApp.
+  Future<Payment> handOverPayment(String paymentId, String otp) async {
     final res = await http.post(
       Uri.parse("$apiBaseUrl/payments/$paymentId/hand-over"),
       headers: _headers,
+      body: jsonEncode({"otp": otp}),
     );
     final data = _decode(res);
     return Payment.fromJson(data["payment"] as Map<String, dynamic>);

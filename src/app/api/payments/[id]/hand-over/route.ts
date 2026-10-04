@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { getSessionFromRequest } from "@/lib/auth";
+import { verifyOtp } from "@/lib/fast2sms";
+import { loadHandOverTarget } from "@/lib/hand-over";
 import { connectToDatabase } from "@/lib/mongodb";
+import { readJsonBody } from "@/lib/read-json";
 import { serializePayment } from "@/lib/serialize-payment";
-import PaymentModel from "@/models/Payment";
 
 /**
  * Records that the field rep has handed the disbursed cash to the doctor.
- * Only allowed once an admin has given the payment and generated its receipt.
+ * Only allowed once an admin has given the payment and generated its receipt,
+ * and only with the OTP sent to the doctor's WhatsApp via `send-otp`.
  */
 export async function POST(
   request: Request,
@@ -19,31 +22,34 @@ export async function POST(
   }
 
   const { id } = await params;
-
-  await connectToDatabase();
-
-  const payment = await PaymentModel.findById(id);
-  if (!payment) {
+  const body = await readJsonBody(request);
+  const otp = typeof body?.otp === "string" ? body.otp.trim() : "";
+  if (!/^\d{4,8}$/.test(otp)) {
     return NextResponse.json(
-      { error: "Payment request not found" },
-      { status: 404 }
-    );
-  }
-
-  const isOwner = payment.requestedBy?.username === session.username;
-  if (session.role !== "admin" && !isOwner) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  if (!payment.paidAt) {
-    return NextResponse.json(
-      { error: "The admin has not generated the receipt for this payment yet" },
+      { error: "Enter the OTP sent to the doctor's WhatsApp" },
       { status: 400 }
     );
   }
-  if (payment.handedOverAt) {
+
+  await connectToDatabase();
+
+  const target = await loadHandOverTarget(id, session);
+  if ("error" in target) return target.error;
+  const { payment, mobile } = target;
+
+  let verified = false;
+  try {
+    verified = await verifyOtp(mobile, otp);
+  } catch (error) {
+    console.error("Fast2SMS verify OTP failed", error);
     return NextResponse.json(
-      { error: "This payment has already been given to the doctor" },
+      { error: "Could not verify the OTP. Please try again." },
+      { status: 502 }
+    );
+  }
+  if (!verified) {
+    return NextResponse.json(
+      { error: "Incorrect OTP. Please try again." },
       { status: 400 }
     );
   }
