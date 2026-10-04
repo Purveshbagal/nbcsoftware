@@ -3,15 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ListChecks,
-  Wallet,
-  GraduationCap,
-  Users,
-  History,
-  BadgeIndianRupee,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import {
   Sidebar,
@@ -24,53 +16,86 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
+import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { workspaceForPath, type NavNode } from "@/lib/workspaces";
 
-const registerNav = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Register List",
-    url: "/register/list",
-    icon: ListChecks,
-  },
-  {
-    title: "Approval History",
-    url: "/register/approval-history",
-    icon: History,
-  },
-];
+function isActivePath(pathname: string, url: string) {
+  return pathname === url || pathname.startsWith(`${url}/`);
+}
 
-const paymentNav = [
-  {
-    title: "Payment Request",
-    url: "/payment/request",
-    icon: Wallet,
-  },
-  {
-    title: "Payment History",
-    url: "/payment/approval-history",
-    icon: History,
-  },
-  {
-    title: "Give Payment",
-    url: "/payment/give",
-    icon: BadgeIndianRupee,
-  },
-];
+function NavItem({ node, pathname }: { node: NavNode; pathname: string }) {
+  const { state, setOpen } = useSidebar();
 
-const adminNav = [
-  {
-    title: "Users",
-    url: "/users",
-    icon: Users,
-  },
-];
+  const containsActive = Boolean(
+    node.items?.some((leaf) => isActivePath(pathname, leaf.url))
+  );
+  const [open, setOpen_] = React.useState(containsActive);
+
+  // Re-open the branch when navigation lands inside it, adjusting during render
+  // rather than in an effect so there is no second paint with it still closed.
+  const [wasActive, setWasActive] = React.useState(containsActive);
+  if (containsActive !== wasActive) {
+    setWasActive(containsActive);
+    if (containsActive) setOpen_(true);
+  }
+
+  if (!node.items) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          render={<Link href={node.url ?? "#"} />}
+          isActive={node.url ? pathname === node.url : false}
+          tooltip={node.title}
+        >
+          <node.icon />
+          <span>{node.title}</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        tooltip={node.title}
+        isActive={containsActive && state === "collapsed"}
+        aria-expanded={open}
+        onClick={() => {
+          // A collapsed rail has nowhere to show the sub-list, so expand first.
+          if (state === "collapsed") setOpen(true);
+          setOpen_((previous) => (state === "collapsed" ? true : !previous));
+        }}
+      >
+        <node.icon />
+        <span>{node.title}</span>
+        <ChevronRight
+          className={`ml-auto size-4 transition-transform duration-200 ${open ? "rotate-90" : ""}`}
+        />
+      </SidebarMenuButton>
+      {open ? (
+        <SidebarMenuSub>
+          {node.items.map((leaf) => (
+            <SidebarMenuSubItem key={leaf.url}>
+              <SidebarMenuSubButton
+                render={<Link href={leaf.url} />}
+                isActive={pathname === leaf.url}
+              >
+                <span>{leaf.title}</span>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+          ))}
+        </SidebarMenuSub>
+      ) : null}
+    </SidebarMenuItem>
+  );
+}
 
 export function AppSidebar({
   user,
@@ -79,82 +104,31 @@ export function AppSidebar({
   user: { name: string; username: string };
 }) {
   const pathname = usePathname();
+  const workspace = workspaceForPath(pathname);
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <GraduationCap className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">NBC Pedia</span>
-                <span className="truncate text-xs">Team workspace</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <WorkspaceSwitcher active={workspace} />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Registration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {registerNav.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<Link href={item.url} />}
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Payments</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {paymentNav.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<Link href={item.url} />}
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Administration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminNav.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<Link href={item.url} />}
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {workspace.groups.map((group) => (
+          <SidebarGroup key={`${workspace.id}-${group.label}`}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((node) => (
+                  // Keyed by workspace so switching rebuilds the open/closed state.
+                  <NavItem
+                    key={`${workspace.id}-${node.title}`}
+                    node={node}
+                    pathname={pathname}
+                  />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
@@ -163,5 +137,3 @@ export function AppSidebar({
     </Sidebar>
   );
 }
-
-export const allNavItems = [...registerNav, ...paymentNav, ...adminNav];
