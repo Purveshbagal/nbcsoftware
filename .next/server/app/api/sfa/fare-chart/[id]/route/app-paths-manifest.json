@@ -1,0 +1,3 @@
+{
+  "/api/sfa/fare-chart/[id]/route": "app/api/sfa/fare-chart/[id]/route.js"
+}

@@ -1,0 +1,3 @@
+{
+  "/api/sfa/visits/firms/[id]/route": "app/api/sfa/visits/firms/[id]/route.js"
+}

@@ -1,0 +1,1010 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "onMatchHeaders": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/labs/reminders/[id]",
+      "regex": "^/api/labs/reminders/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/labs/reminders/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]",
+      "regex": "^/api/payments/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]/give-payment",
+      "regex": "^/api/payments/([^/]+?)/give\\-payment(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)/give\\-payment(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]/hand-over",
+      "regex": "^/api/payments/([^/]+?)/hand\\-over(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)/hand\\-over(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]/hand-over/send-otp",
+      "regex": "^/api/payments/([^/]+?)/hand\\-over/send\\-otp(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)/hand\\-over/send\\-otp(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]/receipt-pdf",
+      "regex": "^/api/payments/([^/]+?)/receipt\\-pdf(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)/receipt\\-pdf(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]/survey-pdf",
+      "regex": "^/api/payments/([^/]+?)/survey\\-pdf(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)/survey\\-pdf(?:/)?$"
+    },
+    {
+      "page": "/api/payments/[id]/survey-upload",
+      "regex": "^/api/payments/([^/]+?)/survey\\-upload(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/payments/(?<nxtPid>[^/]+?)/survey\\-upload(?:/)?$"
+    },
+    {
+      "page": "/api/registrations/[id]",
+      "regex": "^/api/registrations/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/registrations/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/administrators/[id]",
+      "regex": "^/api/sfa/administrators/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/administrators/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/calendar/[id]",
+      "regex": "^/api/sfa/calendar/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/calendar/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/doctors/[id]",
+      "regex": "^/api/sfa/doctors/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/doctors/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/employees/[id]",
+      "regex": "^/api/sfa/employees/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/employees/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/employees/[id]/app-access",
+      "regex": "^/api/sfa/employees/([^/]+?)/app\\-access(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/employees/(?<nxtPid>[^/]+?)/app\\-access(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/entitlements/[id]",
+      "regex": "^/api/sfa/entitlements/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/entitlements/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/expenses/[id]",
+      "regex": "^/api/sfa/expenses/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/expenses/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/fare-chart/[id]",
+      "regex": "^/api/sfa/fare\\-chart/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/fare\\-chart/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/firms/[id]",
+      "regex": "^/api/sfa/firms/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/firms/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/leaves/[id]",
+      "regex": "^/api/sfa/leaves/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/leaves/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/masters/[id]",
+      "regex": "^/api/sfa/masters/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/masters/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/media/[id]",
+      "regex": "^/api/sfa/media/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/media/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/month-maintenance/[id]",
+      "regex": "^/api/sfa/month\\-maintenance/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/month\\-maintenance/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/orders/[id]",
+      "regex": "^/api/sfa/orders/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/orders/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/products/[id]",
+      "regex": "^/api/sfa/products/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/products/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/reminders/[id]",
+      "regex": "^/api/sfa/reminders/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/reminders/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/sample-requests/[id]",
+      "regex": "^/api/sfa/sample\\-requests/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/sample\\-requests/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/support/[id]",
+      "regex": "^/api/sfa/support/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/support/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/targets/[id]",
+      "regex": "^/api/sfa/targets/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/targets/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/visits/doctors/[id]",
+      "regex": "^/api/sfa/visits/doctors/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/visits/doctors/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/visits/firms/[id]",
+      "regex": "^/api/sfa/visits/firms/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/sfa/visits/firms/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/users/[id]",
+      "regex": "^/api/users/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/users/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/sfa/settings/masters/[type]",
+      "regex": "^/sfa/settings/masters/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPtype": "nxtPtype"
+      },
+      "namedRegex": "^/sfa/settings/masters/(?<nxtPtype>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/auth/login",
+      "regex": "^/api/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/login(?:/)?$"
+    },
+    {
+      "page": "/api/auth/logout",
+      "regex": "^/api/auth/logout(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/logout(?:/)?$"
+    },
+    {
+      "page": "/api/labs/attendance",
+      "regex": "^/api/labs/attendance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/attendance(?:/)?$"
+    },
+    {
+      "page": "/api/labs/attendance/punch-in",
+      "regex": "^/api/labs/attendance/punch\\-in(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/attendance/punch\\-in(?:/)?$"
+    },
+    {
+      "page": "/api/labs/attendance/punch-out",
+      "regex": "^/api/labs/attendance/punch\\-out(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/attendance/punch\\-out(?:/)?$"
+    },
+    {
+      "page": "/api/labs/auth/login",
+      "regex": "^/api/labs/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/auth/login(?:/)?$"
+    },
+    {
+      "page": "/api/labs/auth/password",
+      "regex": "^/api/labs/auth/password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/auth/password(?:/)?$"
+    },
+    {
+      "page": "/api/labs/doctors",
+      "regex": "^/api/labs/doctors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/doctors(?:/)?$"
+    },
+    {
+      "page": "/api/labs/expenses",
+      "regex": "^/api/labs/expenses(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/expenses(?:/)?$"
+    },
+    {
+      "page": "/api/labs/firms",
+      "regex": "^/api/labs/firms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/firms(?:/)?$"
+    },
+    {
+      "page": "/api/labs/holidays",
+      "regex": "^/api/labs/holidays(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/holidays(?:/)?$"
+    },
+    {
+      "page": "/api/labs/leave-balance",
+      "regex": "^/api/labs/leave\\-balance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/leave\\-balance(?:/)?$"
+    },
+    {
+      "page": "/api/labs/leaves",
+      "regex": "^/api/labs/leaves(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/leaves(?:/)?$"
+    },
+    {
+      "page": "/api/labs/location",
+      "regex": "^/api/labs/location(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/location(?:/)?$"
+    },
+    {
+      "page": "/api/labs/masters",
+      "regex": "^/api/labs/masters(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/masters(?:/)?$"
+    },
+    {
+      "page": "/api/labs/me",
+      "regex": "^/api/labs/me(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/me(?:/)?$"
+    },
+    {
+      "page": "/api/labs/media",
+      "regex": "^/api/labs/media(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/media(?:/)?$"
+    },
+    {
+      "page": "/api/labs/orders",
+      "regex": "^/api/labs/orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/orders(?:/)?$"
+    },
+    {
+      "page": "/api/labs/products",
+      "regex": "^/api/labs/products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/products(?:/)?$"
+    },
+    {
+      "page": "/api/labs/reminders",
+      "regex": "^/api/labs/reminders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/reminders(?:/)?$"
+    },
+    {
+      "page": "/api/labs/sample-requests",
+      "regex": "^/api/labs/sample\\-requests(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/sample\\-requests(?:/)?$"
+    },
+    {
+      "page": "/api/labs/support",
+      "regex": "^/api/labs/support(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/support(?:/)?$"
+    },
+    {
+      "page": "/api/labs/targets",
+      "regex": "^/api/labs/targets(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/targets(?:/)?$"
+    },
+    {
+      "page": "/api/labs/visits",
+      "regex": "^/api/labs/visits(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/labs/visits(?:/)?$"
+    },
+    {
+      "page": "/api/payments",
+      "regex": "^/api/payments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/payments(?:/)?$"
+    },
+    {
+      "page": "/api/products",
+      "regex": "^/api/products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/products(?:/)?$"
+    },
+    {
+      "page": "/api/registrations",
+      "regex": "^/api/registrations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/registrations(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/administrators",
+      "regex": "^/api/sfa/administrators(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/administrators(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/calendar",
+      "regex": "^/api/sfa/calendar(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/calendar(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/doctors",
+      "regex": "^/api/sfa/doctors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/doctors(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/employees",
+      "regex": "^/api/sfa/employees(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/employees(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/entitlements",
+      "regex": "^/api/sfa/entitlements(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/entitlements(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/expenses",
+      "regex": "^/api/sfa/expenses(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/expenses(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/fare-chart",
+      "regex": "^/api/sfa/fare\\-chart(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/fare\\-chart(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/firms",
+      "regex": "^/api/sfa/firms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/firms(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/leaves",
+      "regex": "^/api/sfa/leaves(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/leaves(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/masters",
+      "regex": "^/api/sfa/masters(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/masters(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/media",
+      "regex": "^/api/sfa/media(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/media(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/month-maintenance",
+      "regex": "^/api/sfa/month\\-maintenance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/month\\-maintenance(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/orders",
+      "regex": "^/api/sfa/orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/orders(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/products",
+      "regex": "^/api/sfa/products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/products(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/reminders",
+      "regex": "^/api/sfa/reminders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/reminders(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/sample-requests",
+      "regex": "^/api/sfa/sample\\-requests(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/sample\\-requests(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/settings",
+      "regex": "^/api/sfa/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/settings(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/support",
+      "regex": "^/api/sfa/support(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/support(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/targets",
+      "regex": "^/api/sfa/targets(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/targets(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/tracking/live",
+      "regex": "^/api/sfa/tracking/live(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/tracking/live(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/tracking/trail",
+      "regex": "^/api/sfa/tracking/trail(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/tracking/trail(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/visits/doctors",
+      "regex": "^/api/sfa/visits/doctors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/visits/doctors(?:/)?$"
+    },
+    {
+      "page": "/api/sfa/visits/firms",
+      "regex": "^/api/sfa/visits/firms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sfa/visits/firms(?:/)?$"
+    },
+    {
+      "page": "/api/users",
+      "regex": "^/api/users(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/payment/approval-history",
+      "regex": "^/payment/approval\\-history(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/payment/approval\\-history(?:/)?$"
+    },
+    {
+      "page": "/payment/give",
+      "regex": "^/payment/give(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/payment/give(?:/)?$"
+    },
+    {
+      "page": "/payment/request",
+      "regex": "^/payment/request(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/payment/request(?:/)?$"
+    },
+    {
+      "page": "/register/approval-history",
+      "regex": "^/register/approval\\-history(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/register/approval\\-history(?:/)?$"
+    },
+    {
+      "page": "/register/list",
+      "regex": "^/register/list(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/register/list(?:/)?$"
+    },
+    {
+      "page": "/sfa",
+      "regex": "^/sfa(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa(?:/)?$"
+    },
+    {
+      "page": "/sfa/accounting",
+      "regex": "^/sfa/accounting(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/accounting(?:/)?$"
+    },
+    {
+      "page": "/sfa/billing",
+      "regex": "^/sfa/billing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/billing(?:/)?$"
+    },
+    {
+      "page": "/sfa/business/doctor",
+      "regex": "^/sfa/business/doctor(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/business/doctor(?:/)?$"
+    },
+    {
+      "page": "/sfa/business/firm",
+      "regex": "^/sfa/business/firm(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/business/firm(?:/)?$"
+    },
+    {
+      "page": "/sfa/calendar/holiday-work",
+      "regex": "^/sfa/calendar/holiday\\-work(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/calendar/holiday\\-work(?:/)?$"
+    },
+    {
+      "page": "/sfa/calendar/leave",
+      "regex": "^/sfa/calendar/leave(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/calendar/leave(?:/)?$"
+    },
+    {
+      "page": "/sfa/course-work",
+      "regex": "^/sfa/course\\-work(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/course\\-work(?:/)?$"
+    },
+    {
+      "page": "/sfa/e-detailing/media",
+      "regex": "^/sfa/e\\-detailing/media(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/e\\-detailing/media(?:/)?$"
+    },
+    {
+      "page": "/sfa/e-detailing/presentation",
+      "regex": "^/sfa/e\\-detailing/presentation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/e\\-detailing/presentation(?:/)?$"
+    },
+    {
+      "page": "/sfa/expense",
+      "regex": "^/sfa/expense(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/expense(?:/)?$"
+    },
+    {
+      "page": "/sfa/expense/day-wise",
+      "regex": "^/sfa/expense/day\\-wise(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/expense/day\\-wise(?:/)?$"
+    },
+    {
+      "page": "/sfa/expense/designation-wise",
+      "regex": "^/sfa/expense/designation\\-wise(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/expense/designation\\-wise(?:/)?$"
+    },
+    {
+      "page": "/sfa/expense/fare-chart",
+      "regex": "^/sfa/expense/fare\\-chart(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/expense/fare\\-chart(?:/)?$"
+    },
+    {
+      "page": "/sfa/expense/month-maintenance",
+      "regex": "^/sfa/expense/month\\-maintenance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/expense/month\\-maintenance(?:/)?$"
+    },
+    {
+      "page": "/sfa/expense/sfc-approval",
+      "regex": "^/sfa/expense/sfc\\-approval(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/expense/sfc\\-approval(?:/)?$"
+    },
+    {
+      "page": "/sfa/files",
+      "regex": "^/sfa/files(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/files(?:/)?$"
+    },
+    {
+      "page": "/sfa/hiringlane",
+      "regex": "^/sfa/hiringlane(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/hiringlane(?:/)?$"
+    },
+    {
+      "page": "/sfa/hr/attendance",
+      "regex": "^/sfa/hr/attendance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/hr/attendance(?:/)?$"
+    },
+    {
+      "page": "/sfa/hr/entitlements",
+      "regex": "^/sfa/hr/entitlements(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/hr/entitlements(?:/)?$"
+    },
+    {
+      "page": "/sfa/hr/leave",
+      "regex": "^/sfa/hr/leave(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/hr/leave(?:/)?$"
+    },
+    {
+      "page": "/sfa/hr/leave-report",
+      "regex": "^/sfa/hr/leave\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/hr/leave\\-report(?:/)?$"
+    },
+    {
+      "page": "/sfa/insurance",
+      "regex": "^/sfa/insurance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/insurance(?:/)?$"
+    },
+    {
+      "page": "/sfa/payroll",
+      "regex": "^/sfa/payroll(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/payroll(?:/)?$"
+    },
+    {
+      "page": "/sfa/people/administrators",
+      "regex": "^/sfa/people/administrators(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/people/administrators(?:/)?$"
+    },
+    {
+      "page": "/sfa/people/app-access",
+      "regex": "^/sfa/people/app\\-access(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/people/app\\-access(?:/)?$"
+    },
+    {
+      "page": "/sfa/people/doctors",
+      "regex": "^/sfa/people/doctors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/people/doctors(?:/)?$"
+    },
+    {
+      "page": "/sfa/people/employees",
+      "regex": "^/sfa/people/employees(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/people/employees(?:/)?$"
+    },
+    {
+      "page": "/sfa/product-qr",
+      "regex": "^/sfa/product\\-qr(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/product\\-qr(?:/)?$"
+    },
+    {
+      "page": "/sfa/products",
+      "regex": "^/sfa/products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/products(?:/)?$"
+    },
+    {
+      "page": "/sfa/reminders",
+      "regex": "^/sfa/reminders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reminders(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports",
+      "regex": "^/sfa/reports(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports/call-report",
+      "regex": "^/sfa/reports/call\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports/call\\-report(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports/daily-call-report",
+      "regex": "^/sfa/reports/daily\\-call\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports/daily\\-call\\-report(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports/employee-performance",
+      "regex": "^/sfa/reports/employee\\-performance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports/employee\\-performance(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports/expense-report",
+      "regex": "^/sfa/reports/expense\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports/expense\\-report(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports/leave-report",
+      "regex": "^/sfa/reports/leave\\-report(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports/leave\\-report(?:/)?$"
+    },
+    {
+      "page": "/sfa/reports/visit-tracker",
+      "regex": "^/sfa/reports/visit\\-tracker(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/reports/visit\\-tracker(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/firm-monthly",
+      "regex": "^/sfa/sales/firm\\-monthly(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/firm\\-monthly(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/firms",
+      "regex": "^/sfa/sales/firms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/firms(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/orders",
+      "regex": "^/sfa/sales/orders(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/orders(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/rate-master",
+      "regex": "^/sfa/sales/rate\\-master(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/rate\\-master(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/secondary-sales",
+      "regex": "^/sfa/sales/secondary\\-sales(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/secondary\\-sales(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/stock-maintenance",
+      "regex": "^/sfa/sales/stock\\-maintenance(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/stock\\-maintenance(?:/)?$"
+    },
+    {
+      "page": "/sfa/sales/target",
+      "regex": "^/sfa/sales/target(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sales/target(?:/)?$"
+    },
+    {
+      "page": "/sfa/sample-request",
+      "regex": "^/sfa/sample\\-request(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/sample\\-request(?:/)?$"
+    },
+    {
+      "page": "/sfa/settings/approvals",
+      "regex": "^/sfa/settings/approvals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/settings/approvals(?:/)?$"
+    },
+    {
+      "page": "/sfa/settings/branding",
+      "regex": "^/sfa/settings/branding(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/settings/branding(?:/)?$"
+    },
+    {
+      "page": "/sfa/settings/general",
+      "regex": "^/sfa/settings/general(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/settings/general(?:/)?$"
+    },
+    {
+      "page": "/sfa/settings/masters",
+      "regex": "^/sfa/settings/masters(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/settings/masters(?:/)?$"
+    },
+    {
+      "page": "/sfa/settings/terminology",
+      "regex": "^/sfa/settings/terminology(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/settings/terminology(?:/)?$"
+    },
+    {
+      "page": "/sfa/support",
+      "regex": "^/sfa/support(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/support(?:/)?$"
+    },
+    {
+      "page": "/sfa/tracking",
+      "regex": "^/sfa/tracking(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/tracking(?:/)?$"
+    },
+    {
+      "page": "/sfa/visits/doctors",
+      "regex": "^/sfa/visits/doctors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/visits/doctors(?:/)?$"
+    },
+    {
+      "page": "/sfa/visits/firms",
+      "regex": "^/sfa/visits/firms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sfa/visits/firms(?:/)?$"
+    },
+    {
+      "page": "/users",
+      "regex": "^/users(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/users(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

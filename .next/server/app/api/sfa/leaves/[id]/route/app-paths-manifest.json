@@ -1,0 +1,3 @@
+{
+  "/api/sfa/leaves/[id]/route": "app/api/sfa/leaves/[id]/route.js"
+}

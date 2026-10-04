@@ -1,0 +1,3 @@
+{
+  "/api/labs/reminders/[id]/route": "app/api/labs/reminders/[id]/route.js"
+}
