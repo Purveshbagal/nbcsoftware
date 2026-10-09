@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isValidObjectId } from "mongoose";
 
-import { istDateKey, trailDistanceKm } from "@/lib/labs-auth";
+import { istDateKey, thinTrail, trailDistanceKm } from "@/lib/labs-auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { requireAdmin } from "@/lib/sfa-crud";
 import AttendanceModel from "@/models/Attendance";
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     date,
     employee: { id: employeeId, name: employee.name },
-    points: pings,
+    points: thinTrail(pings),
     distanceKm: trailDistanceKm(pings),
     visits,
     attendance,

@@ -136,6 +136,25 @@ export function haversineKm(
 }
 
 /**
+ * A trail fit for drawing: fixes with poor accuracy are dropped, and so is any
+ * fix within `minMeters` of the last one kept, which removes the jitter of
+ * someone standing still without losing the turns of a road.
+ */
+export function thinTrail<T extends { lat: number; lng: number; accuracy?: number | null }>(
+  points: T[],
+  minMeters = 10
+): T[] {
+  const kept: T[] = [];
+  for (const point of points) {
+    if (point.accuracy && point.accuracy > 100) continue;
+    const previous = kept[kept.length - 1];
+    if (previous && haversineKm(previous, point) * 1000 < minMeters) continue;
+    kept.push(point);
+  }
+  return kept;
+}
+
+/**
  * Length of a GPS trail, ignoring hops that are almost certainly noise: fixes
  * with poor accuracy, and jitter under 20 m while standing still.
  */
