@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowUpRight, ListChecks, ShieldCheck, UserPlus, Wallet } from "lucide-react";
+import { ArrowUpRight, BadgeIndianRupee, Hourglass, ListChecks, ShieldCheck, Stethoscope, UserPlus, Wallet } from "lucide-react";
 
 import { AutoRefresh } from "@/components/auto-refresh";
+import { LedgerStat, UserLedgerTable } from "@/components/payment-ledger";
 import {
   Card,
   CardDescription,
@@ -9,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { connectToDatabase } from "@/lib/mongodb";
+import { formatRupees, isPaid, loadLedger, summarizeByUser, totalsOf } from "@/lib/payment-ledger";
 import PaymentModel from "@/models/Payment";
 import RegistrationModel from "@/models/Registration";
 
@@ -20,12 +22,19 @@ export default async function DashboardPage() {
     pendingApprovals,
     pendingPaymentRequests,
     completedRegisters,
+    ledger,
   ] = await Promise.all([
     RegistrationModel.countDocuments({}),
     RegistrationModel.countDocuments({ status: "pending" }),
     PaymentModel.countDocuments({ status: "pending" }),
     RegistrationModel.countDocuments({ status: "approved" }),
+    loadLedger(),
   ]);
+  const paymentTotals = totalsOf(ledger);
+  const userSummaries = await summarizeByUser(ledger);
+  const doctorsWaiting = new Set(
+    ledger.filter((payment) => !isPaid(payment)).map((payment) => payment.doctorId)
+  ).size;
 
   const stats = [
     {
@@ -85,6 +94,50 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </div>
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 className="text-lg font-semibold">Payments to doctors</h3>
+            <p className="text-muted-foreground text-sm">
+              Approved payments across all users. Open a user to see their doctors.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <LedgerStat
+            label="Total paid (all users)"
+            value={formatRupees(paymentTotals.paidAmount)}
+            detail={`${paymentTotals.paidCount} given to doctors`}
+            icon={BadgeIndianRupee}
+            tone="bg-teal-50 text-teal-700"
+            href="/payment/paid"
+          />
+          <LedgerStat
+            label="Total pending (all users)"
+            value={formatRupees(paymentTotals.pendingAmount)}
+            detail={`${paymentTotals.pendingCount} still to give`}
+            icon={Hourglass}
+            tone="bg-amber-50 text-amber-700"
+            href="/payment/pending"
+          />
+          <LedgerStat
+            label="Total approved"
+            value={formatRupees(paymentTotals.paidAmount + paymentTotals.pendingAmount)}
+            detail={`${ledger.length} approved payments`}
+            icon={Wallet}
+            tone="bg-blue-50 text-blue-700"
+          />
+          <LedgerStat
+            label="Doctors waiting"
+            value={doctorsWaiting.toLocaleString("en-IN")}
+            detail="with a pending payment"
+            icon={Stethoscope}
+            tone="bg-violet-50 text-violet-700"
+            href="/payment/pending"
+          />
+        </div>
+        <UserLedgerTable summaries={userSummaries} />
+      </section>
       <section className="mt-2 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <div className="relative overflow-hidden rounded-2xl bg-[#122b40] p-7 text-white sm:p-9">
           <p className="text-xs font-semibold tracking-[.16em] text-[#72ddd0]">KEEP THINGS MOVING</p>
