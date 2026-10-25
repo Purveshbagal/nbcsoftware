@@ -268,6 +268,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
     final doctor = _visit!["doctor"];
     final status = _visit!["status"] ?? "planned";
+    print("DEBUG: Visit status = $status"); // Debug log
     final doctorName = doctor is Map ? doctor["name"]?.toString() ?? "Unknown Doctor" : doctor?.toString() ?? "Unknown Doctor";
     final hospitalName = doctor is Map ? doctor["hospitalName"]?.toString() ?? "" : _visit!["clinicAddress"]?.toString() ?? "";
     final plannedDate = _visit!["plannedDate"] != null
@@ -284,9 +285,10 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
           if (status == "open")
             IconButton(
               onPressed: _closeVisit,
-              icon: const Icon(Icons.check_circle, color: Colors.white),
+              icon: const Icon(Icons.check_circle),
               tooltip: "Close Visit",
               iconSize: 28,
+              color: AppTheme.indigo,
             ),
         ],
       ),
