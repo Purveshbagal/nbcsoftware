@@ -1,14 +1,9 @@
-name: Deploy to VPS
-
+name: Deploy NBC Software
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Deploy
-        run: |
-          curl -X POST https://deploy.awaitware.com/nbcsoftware
+      - run: curl -X POST https://deploy.awaitware.com/nbcsoftware
