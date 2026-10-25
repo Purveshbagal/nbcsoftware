@@ -4,6 +4,7 @@ import { getSessionFromRequest } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { serializeRegistration } from "@/lib/serialize-registration";
 import { getNextSequence } from "@/models/Counter";
+import DoctorModel from "@/models/Doctor";
 import RegistrationModel from "@/models/Registration";
 import { generateDoctorUinId } from "@/utils/doctorUinGenerator";
 
@@ -27,8 +28,50 @@ export async function GET(request: Request) {
     .sort({ createdAt: -1 })
     .lean();
 
+  let allRegistrations = registrations.map(serializeRegistration);
+
+  // If fetching approved registrations, also include approved doctors from DoctorModel
+  // (doctors added via mobile-labs/racer app)
+  if (status === "approved") {
+    const approvedDoctors = await DoctorModel.find({
+      approvalStatus: "approved",
+      isActive: { $ne: false },
+      source: { $in: ["racer", "survey"] },
+    })
+      .select("uinId name hospitalName hospitalAddress contactNo email qualification")
+      .sort({ name: 1 })
+      .lean();
+
+    // Convert Doctor records to Registration format
+    const doctorRegistrations = approvedDoctors.map((doc: any) => ({
+      _id: doc._id.toString(),
+      doctorId: doc.uinId || "",
+      doctorName: doc.name || "",
+      doctorAddress: "",
+      doctorQualification: doc.qualification || "",
+      registrationNumber: "",
+      mobileNumber: doc.contactNo || "",
+      hospitalName: doc.hospitalName || "",
+      hospitalAddress: doc.hospitalAddress || "",
+      doctorPanNumber: "",
+      bankDetails: {
+        bankName: "",
+        accountNumber: "",
+        ifscCode: "",
+        branchName: "",
+      },
+      status: "approved" as const,
+      createdAt: doc.createdAt || new Date().toISOString(),
+    }));
+
+    // Merge both lists, avoiding duplicates by doctorId
+    const existingDoctorIds = new Set(allRegistrations.map((r) => r.doctorId));
+    const newDoctors = doctorRegistrations.filter((d) => !existingDoctorIds.has(d.doctorId));
+    allRegistrations = [...allRegistrations, ...newDoctors];
+  }
+
   return NextResponse.json({
-    registrations: registrations.map(serializeRegistration),
+    registrations: allRegistrations,
   });
 }
 

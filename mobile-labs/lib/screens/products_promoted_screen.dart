@@ -160,10 +160,17 @@ class _ProductsPromotedScreenState extends State<ProductsPromotedScreen> {
       appBar: AppBar(
         title: const Text("Products Promoted"),
         actions: [
-          TextButton.icon(
-            onPressed: _save,
-            icon: const Icon(Icons.check, color: Colors.white),
-            label: const Text("Done", style: TextStyle(color: Colors.white)),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilledButton.icon(
+              onPressed: _save,
+              icon: const Icon(Icons.check, size: 20),
+              label: const Text("Done"),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.emerald,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ),
         ],
       ),
