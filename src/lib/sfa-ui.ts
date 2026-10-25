@@ -19,6 +19,8 @@ export type Column = {
   type?: ColumnType;
   /** Hidden on narrow screens when true. */
   secondary?: boolean;
+  /** Custom render function (client-side only) */
+  render?: (row: EntityRow) => React.ReactNode;
 };
 
 export type FieldType =

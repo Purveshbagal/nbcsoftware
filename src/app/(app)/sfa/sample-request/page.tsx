@@ -1,4 +1,4 @@
-import { EntityTable } from "@/components/sfa/entity-table";
+import { SampleRequestTable } from "@/components/sfa/sample-request-table";
 import { PageHeader } from "@/components/sfa/page-header";
 import { loadEmployeeNames, loadMasterOptions } from "@/lib/master-options";
 import { connectToDatabase } from "@/lib/mongodb";
@@ -61,10 +61,8 @@ export default async function SampleRequestPage() {
         title="Sample Request"
         description="Requests for samples and promotional gifts, and the decision taken on each."
       />
-      <EntityTable
+      <SampleRequestTable
         endpoint="/api/sfa/sample-requests"
-        entityName="Request"
-        labelKey="item"
         rows={toPlainRows(docs)}
         columns={columns}
         fields={fields}
@@ -73,6 +71,7 @@ export default async function SampleRequestPage() {
           { key: "itemType", label: "Type", options: ["sample", "gift"] },
           { key: "employeeName", label: "Employee", options: employees },
         ]}
+        employees={employees}
       />
     </div>
   );

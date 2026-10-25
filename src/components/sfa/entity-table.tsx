@@ -656,7 +656,9 @@ export function EntityTable({
                           key={column.key}
                           className={column.secondary ? "hidden lg:table-cell" : undefined}
                         >
-                          {column.type === "badge" && text ? (
+                          {column.render ? (
+                            column.render(row)
+                          ) : column.type === "badge" && text ? (
                             <Badge variant={BADGE_TONE[text.toLowerCase()] ?? "secondary"}>
                               {text}
                             </Badge>
