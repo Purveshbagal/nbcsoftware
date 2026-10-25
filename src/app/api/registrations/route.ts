@@ -58,8 +58,10 @@ export async function POST(request: Request) {
 
   await connectToDatabase();
 
-  const seq = await getNextSequence("doctorId");
-  const doctorId = `DOC-${String(seq).padStart(4, "0")}`;
+  // Keep the mobile doctor's UIN sequence separate from retired HH doctor IDs.
+  // The first mobile doctor is MH001, followed by MH002, MH003, and so on.
+  const seq = await getNextSequence("mobileDoctorUin");
+  const doctorId = `MH${String(seq).padStart(3, "0")}`;
 
   const registration = await RegistrationModel.create({
     doctorId,

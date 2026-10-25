@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireEmployee } from "@/lib/labs-auth";
 import { readJsonBody } from "@/lib/read-json";
 import VisitModel from "@/models/Visit";
+import SampleRequestModel from "@/models/SampleRequest";
 
 type ProductPromoted = {
   productId: string;
@@ -39,6 +40,9 @@ export async function PUT(
         notMetReason?: string;
         productsPromoted?: ProductPromoted[];
         samplesGiven?: SampleGiven[];
+        callObjective?: string;
+        remarks?: string;
+        extraInfo?: string;
       }
     | null;
 
@@ -62,10 +66,34 @@ export async function PUT(
     );
   }
 
+  // Samples are inventory allocated only after an administrator approves the
+  // field employee's request. Never allow a visit to consume more than that.
+  if (body.samplesGiven?.length) {
+    const [approved, completed] = await Promise.all([
+      SampleRequestModel.find({ employeeName: employee.name, itemType: "sample", status: "approved" }).lean(),
+      VisitModel.find({ employeeName: employee.name, status: "closed", _id: { $ne: visit._id } }).select("samplesGiven").lean(),
+    ]);
+    const available = new Map<string, number>();
+    for (const row of approved) available.set(row.item, (available.get(row.item) ?? 0) + row.quantity);
+    for (const row of completed) for (const sample of row.samplesGiven ?? []) {
+      available.set(sample.productName, (available.get(sample.productName) ?? 0) - sample.quantity);
+    }
+    for (const sample of body.samplesGiven) {
+      const quantity = Number(sample.quantity) || 0;
+      if (quantity > (available.get(sample.productName) ?? 0)) {
+        return NextResponse.json({ error: `Insufficient approved sample stock for ${sample.productName}.` }, { status: 400 });
+      }
+      available.set(sample.productName, (available.get(sample.productName) ?? 0) - quantity);
+    }
+  }
+
   const now = new Date();
 
   visit.metDoctor = body.metDoctor;
   visit.checkOutAt = now;
+  visit.callObjective = String(body.callObjective ?? "").trim();
+  visit.remarks = String(body.remarks ?? "").trim();
+  visit.extraInfo = String(body.extraInfo ?? "").trim();
 
   if (!body.metDoctor) {
     // Doctor not met - mark as skipped

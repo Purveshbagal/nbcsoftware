@@ -5,7 +5,7 @@ import { readJsonBody } from "@/lib/read-json";
 import DoctorModel from "@/models/Doctor";
 
 const LIST_FIELDS =
-  "doctorCode prefix name hospitalName speciality qualification category contactNo city clinicAddress zone assignedEmployees approvalStatus";
+  "doctorCode uinId prefix name hospitalName hospitalAddress speciality qualification category contactNo email city pincode clinicAddress gender location bankDetails zone assignedEmployees approvalStatus";
 
 const WRITABLE = [
   "prefix",
@@ -55,21 +55,21 @@ export async function GET(request: Request) {
 }
 
 /**
- * Generate next UIN ID in format MH001, MH002, etc.
+ * Generate next UIN ID in format HH001, HH002, etc.
  */
 async function generateUinId(): Promise<string> {
-  const lastDoctor = await DoctorModel.findOne({ uinId: { $regex: /^MH\d+$/ } })
+  const lastDoctor = await DoctorModel.findOne({ uinId: { $regex: /^HH\d+$/ } })
     .sort({ uinId: -1 })
     .select("uinId")
     .lean();
 
   if (!lastDoctor?.uinId) {
-    return "MH001";
+    return "HH001";
   }
 
   const lastNumber = parseInt(lastDoctor.uinId.substring(2), 10);
   const nextNumber = lastNumber + 1;
-  return `MH${String(nextNumber).padStart(3, "0")}`;
+  return `HH${String(nextNumber).padStart(3, "0")}`;
 }
 
 /** A new doctor met in the field. It is assigned to whoever added it. */

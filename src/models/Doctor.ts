@@ -3,7 +3,7 @@ import mongoose, { Schema, type InferSchemaType } from "mongoose";
 const doctorSchema = new Schema(
   {
     doctorCode: { type: String, trim: true },
-    uinId: { type: String, trim: true, unique: true, sparse: true }, // MH001, MH002, etc.
+    uinId: { type: String, trim: true, unique: true, sparse: true }, // HH001, HH002, etc.
     prefix: { type: String, trim: true, default: "Dr" },
     name: { type: String, required: true, trim: true },
     hospitalName: { type: String, trim: true },

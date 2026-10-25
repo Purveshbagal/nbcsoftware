@@ -167,7 +167,11 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
                                         icon: const Icon(Icons.call_rounded, color: AppTheme.emerald),
                                         onPressed: () => launchUrl(Uri.parse("tel:$phone")),
                                       ),
-                        onTap: widget.pickMode ? () => Navigator.of(context).pop(item) : null,
+                        onTap: widget.pickMode
+                            ? () => Navigator.of(context).pop(item)
+                            : isDoctor
+                                ? () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => DoctorDetailsScreen(doctor: item)))
+                                : null,
                       ),
                     );
                   },
@@ -175,6 +179,45 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Read-only profile for a doctor saved in the app directory.
+class DoctorDetailsScreen extends StatelessWidget {
+  final Json doctor;
+  const DoctorDetailsScreen({super.key, required this.doctor});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = "${str(doctor["prefix"]).isEmpty ? "Dr" : doctor["prefix"]}. ${str(doctor["name"])}";
+    final rows = <(String, String)>[
+      ("Speciality", str(doctor["speciality"])),
+      ("Qualification", str(doctor["qualification"])),
+      ("Category", str(doctor["category"])),
+      ("Hospital / Clinic", str(doctor["hospitalName"])),
+      ("Clinic address", str(doctor["clinicAddress"])),
+      ("City", str(doctor["city"])),
+      ("Mobile", str(doctor["contactNo"])),
+      ("Approval", str(doctor["approvalStatus"]).isEmpty ? "Approved" : str(doctor["approvalStatus"])),
+    ];
+    return Scaffold(
+      appBar: AppBar(title: const Text("Doctor details")),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(name, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 6),
+            Text(str(doctor["hospitalName"]), style: const TextStyle(color: AppTheme.muted)),
+          ]))),
+          const SizedBox(height: 12),
+          Card(child: Column(children: [
+            for (final row in rows.where((row) => row.$2.isNotEmpty))
+              ListTile(title: Text(row.$1), subtitle: Text(row.$2)),
+          ])),
         ],
       ),
     );

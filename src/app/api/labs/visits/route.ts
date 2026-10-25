@@ -27,7 +27,18 @@ export async function GET(request: Request) {
 
   // Filter by status: planned, open, closed, skipped
   const status = url.searchParams.get("status");
-  if (status && ["planned", "open", "closed", "skipped"].includes(status)) {
+  const today = istDateKey(new Date());
+  if (status === "planned") {
+    // Future appointments remain in Planned until their scheduled date.
+    query.status = "planned";
+    query.plannedDate = { $gt: today };
+  } else if (status === "open") {
+    // A planned call automatically appears in Open on its scheduled day.
+    query.$or = [
+      { status: "open" },
+      { status: "planned", plannedDate: { $lte: today } },
+    ];
+  } else if (status === "closed" || status === "skipped") {
     query.status = status;
   }
 

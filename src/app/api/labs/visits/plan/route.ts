@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     division: employee.division,
     employeeName: employee.name,
     employeeId: employee.employeeId,
-    plannedDate: body.plannedDate,
+    plannedDate: istDateKey(new Date(body.plannedDate)),
     visitDate: istDateKey(new Date()), // Actual visit date set when checked in
     modeOfTransport,
     status: "planned",
