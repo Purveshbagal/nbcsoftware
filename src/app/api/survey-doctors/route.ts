@@ -6,7 +6,7 @@ import DoctorModel from "@/models/Doctor";
 
 /**
  * Get approved doctors for Survey mobile app
- * Only shows doctors that were added from Racer app and approved by admin
+ * Shows doctors from both Racer app and Survey registrations that are approved by admin
  */
 export async function GET(request: Request) {
   const session = await getSessionFromRequest(request);
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const searchByUin = searchParams.get("uin")?.trim();
 
   const query: Record<string, unknown> = {
-    source: "racer",
+    source: { $in: ["racer", "survey"] },
     approvalStatus: "approved",
     isActive: { $ne: false },
   };
