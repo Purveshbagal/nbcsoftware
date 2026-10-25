@@ -143,11 +143,18 @@ const teamGroups: NavGroup[] = [
   },
   {
     label: "Reports",
-    items: [{ title: "Survey Reports", url: "/survey-reports", icon: BarChart3 }],
+    items: [
+      { title: "Survey Reports", url: "/survey-reports", icon: BarChart3 },
+      { title: "Budget Analytics", url: "/budget-analytics", icon: BadgeIndianRupee },
+    ],
   },
   {
     label: "Administration",
-    items: [{ title: "Users", url: "/users", icon: Users }],
+    items: [
+      { title: "Users", url: "/users", icon: Users },
+      { title: "Doctor Approvals", url: "/doctor-approvals", icon: UserSearch },
+      { title: "Presentations", url: "/presentations", icon: MonitorPlay },
+    ],
   },
 ];
 
@@ -296,7 +303,7 @@ export const WORKSPACES: Workspace[] = [
     badge: "Administration workspace",
     icon: GraduationCap,
     home: "/dashboard",
-    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users"],
+    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics", "/doctor-approvals", "/presentations"],
     groups: teamGroups,
   },
   {

@@ -32,11 +32,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { username, name, password } = await request.json();
+  const { username, name, password, budgetLimit } = await request.json();
 
   if (!username || !name || !password) {
     return NextResponse.json(
       { error: "Username, name and password are required" },
+      { status: 400 }
+    );
+  }
+
+  if (budgetLimit !== undefined && (isNaN(Number(budgetLimit)) || Number(budgetLimit) < 0)) {
+    return NextResponse.json(
+      { error: "Budget limit must be a valid positive number" },
       { status: 400 }
     );
   }
@@ -55,12 +62,23 @@ export async function POST(request: Request) {
 
   const hashed = await bcrypt.hash(password, 10);
 
-  const user = await UserModel.create({
+  const userData: any = {
     username: normalizedUsername,
     name,
     password: hashed,
     role: "field",
-  });
+  };
+
+  if (budgetLimit !== undefined && budgetLimit !== "") {
+    const limitAmount = Number(budgetLimit);
+    userData.budgetLimit = {
+      totalLimit: limitAmount,
+      spentAmount: 0,
+      availableAmount: limitAmount,
+    };
+  }
+
+  const user = await UserModel.create(userData);
 
   return NextResponse.json(
     {

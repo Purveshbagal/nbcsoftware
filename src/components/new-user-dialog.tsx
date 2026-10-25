@@ -22,6 +22,7 @@ const emptyForm = {
   username: "",
   name: "",
   password: "",
+  budgetLimit: "",
 };
 
 export function NewUserDialog() {
@@ -121,6 +122,20 @@ export function NewUserDialog() {
               value={form.password}
               onChange={(e) => updateField("password", e.target.value)}
               autoComplete="new-password"
+              required
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="budgetLimit">Budget Limit (₹)</Label>
+            <Input
+              id="budgetLimit"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.budgetLimit}
+              onChange={(e) => updateField("budgetLimit", e.target.value)}
+              placeholder="Enter budget limit"
               required
             />
           </div>
