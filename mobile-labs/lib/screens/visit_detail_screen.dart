@@ -283,12 +283,17 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
         title: const Text("Visit Details"),
         actions: [
           if (status == "open")
-            IconButton(
-              onPressed: _closeVisit,
-              icon: const Icon(Icons.check_circle),
-              tooltip: "Close Visit",
-              iconSize: 28,
-              color: AppTheme.indigo,
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton.icon(
+                onPressed: _closeVisit,
+                icon: const Icon(Icons.check_circle, size: 20),
+                label: const Text("Close"),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.emerald,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ),
         ],
       ),
