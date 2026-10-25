@@ -1,6 +1,4 @@
-import "dart:convert";
 import "package:flutter/material.dart";
-import "package:file_picker/file_picker.dart";
 
 import "../services/api_client.dart";
 import "../widgets/searchable_dropdown.dart";
@@ -19,10 +17,8 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
 
   final _doctorName = TextEditingController();
   final _mobileNumber = TextEditingController();
-  final _email = TextEditingController();
   final _registrationNumber = TextEditingController();
-  final _doctorAddress = TextEditingController();
-  final _doctorPanNumber = TextEditingController();
+  final _email = TextEditingController();
   final _hospitalName = TextEditingController();
   final _hospitalAddress = TextEditingController();
   final _bankName = TextEditingController();
@@ -42,9 +38,6 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
   final List<String> _categories = ["Important", "Super Important", "A"];
   final List<String> _genders = ["Male", "Female", "Other"];
 
-  // Document upload
-  List<Map<String, dynamic>> _documents = [];
-
   bool _submitting = false;
   bool _loading = true;
   String? _error;
@@ -59,10 +52,8 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
   void dispose() {
     _doctorName.dispose();
     _mobileNumber.dispose();
-    _email.dispose();
     _registrationNumber.dispose();
-    _doctorAddress.dispose();
-    _doctorPanNumber.dispose();
+    _email.dispose();
     _hospitalName.dispose();
     _hospitalAddress.dispose();
     _bankName.dispose();
@@ -89,47 +80,6 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
         _loading = false;
       });
     }
-  }
-
-  Future<void> _pickDocument() async {
-    // Document upload feature - to be implemented later
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Document upload feature coming soon')),
-    );
-
-    /*
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-        allowMultiple: false,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        final bytes = file.bytes;
-
-        if (bytes != null) {
-          final base64String = base64Encode(bytes);
-          setState(() {
-            _documents.add({
-              'name': file.name,
-              'data': base64String,
-              'type': file.extension,
-            });
-          });
-        }
-      }
-    } catch (e) {
-      setState(() => _error = "Failed to pick document: $e");
-    }
-    */
-  }
-
-  void _removeDocument(int index) {
-    setState(() {
-      _documents.removeAt(index);
-    });
   }
 
   Future<void> _submit() async {
@@ -164,23 +114,20 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
       final registration = await widget.apiClient.createRegistration({
         "doctorName": _doctorName.text.trim(),
         "mobileNumber": _mobileNumber.text.trim(),
+        "registrationNumber": _registrationNumber.text.trim(),
         "doctorQualification": _selectedQualification,
         "speciality": _selectedSpeciality,
         "category": _selectedCategory,
         "gender": _selectedGender,
         "email": _email.text.trim(),
-        "doctorAddress": _doctorAddress.text.trim(),
-        "registrationNumber": _registrationNumber.text.trim(),
         "hospitalName": _hospitalName.text.trim(),
         "hospitalAddress": _hospitalAddress.text.trim(),
-        "doctorPanNumber": _doctorPanNumber.text.trim(),
         "bankDetails": {
           "bankName": _bankName.text.trim(),
           "accountNumber": _bankAccountNumber.text.trim(),
           "ifscCode": _bankIfscCode.text.trim(),
           "branchName": _bankBranchName.text.trim(),
         },
-        "documents": _documents.map((d) => d['data']).toList(),
       });
 
       if (!mounted) return;
@@ -196,13 +143,13 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text("New Registration")),
+        appBar: AppBar(title: const Text("Add Doctor")),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("New Registration")),
+      appBar: AppBar(title: const Text("Add Doctor")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -229,6 +176,17 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: "Mobile Number *",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _registrationNumber,
+                decoration: const InputDecoration(
+                  labelText: "Doctor Registration Number *",
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) =>
@@ -266,10 +224,7 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                   border: OutlineInputBorder(),
                 ),
                 items: _categories.map((cat) {
-                  return DropdownMenuItem(
-                    value: cat,
-                    child: Text(cat),
-                  );
+                  return DropdownMenuItem(value: cat, child: Text(cat));
                 }).toList(),
                 onChanged: (value) {
                   setState(() => _selectedCategory = value);
@@ -285,14 +240,17 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                   border: OutlineInputBorder(),
                 ),
                 items: _genders.map((gender) {
-                  return DropdownMenuItem(
-                    value: gender,
-                    child: Text(gender),
-                  );
+                  return DropdownMenuItem(value: gender, child: Text(gender));
                 }).toList(),
                 onChanged: (value) {
                   setState(() => _selectedGender = value);
                 },
+              ),
+              const SizedBox(height: 12),
+
+              Text(
+                "Hospital Information",
+                style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 12),
 
@@ -330,38 +288,6 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Registration Number
-              TextFormField(
-                controller: _registrationNumber,
-                decoration: const InputDecoration(
-                  labelText: "Doctor Registration Number",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Doctor Address
-              TextFormField(
-                controller: _doctorAddress,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: "Doctor Address",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // PAN Number
-              TextFormField(
-                controller: _doctorPanNumber,
-                textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
-                  labelText: "Doctor PAN Number",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
               // Bank Details Card
               Card(
                 child: Padding(
@@ -370,7 +296,7 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        "Bank Details *",
+                        "Bank Details (Optional)",
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       const SizedBox(height: 12),
@@ -380,8 +306,6 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                           labelText: "Bank Name",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? "Required" : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -390,8 +314,6 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                           labelText: "Account Number",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? "Required" : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -401,8 +323,6 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                           labelText: "IFSC Code",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? "Required" : null,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -411,51 +331,12 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
                           labelText: "Branch Name",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? "Required" : null,
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Document Upload Section
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        "Upload Doctor Documents",
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: _pickDocument,
-                        icon: const Icon(Icons.upload_file),
-                        label: const Text("Upload Document (PDF/Image)"),
-                      ),
-                      if (_documents.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        ..._documents.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final doc = entry.value;
-                          return ListTile(
-                            leading: const Icon(Icons.insert_drive_file),
-                            title: Text(doc['name']),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _removeDocument(index),
-                            ),
-                          );
-                        }).toList(),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
 
               if (_error != null) ...[
                 const SizedBox(height: 12),

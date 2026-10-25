@@ -51,6 +51,16 @@ export async function PUT(
 }
 
 /**
+ * Partial update of visit (used for photos, etc.)
+ */
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ visitId: string }> }
+) {
+  return PUT(request, { params });
+}
+
+/**
  * Get visit details by ID
  */
 export async function GET(

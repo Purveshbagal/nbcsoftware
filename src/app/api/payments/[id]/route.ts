@@ -49,8 +49,13 @@ export async function PATCH(
       { new: true }
     ).lean();
 
-    // Update user budget if payment is approved
-    if (body.status === "approved" && existingPayment.requestedBy?.username) {
+    // Consume the assigned limit only when a request first becomes approved.
+    // Retrying an approval must not deduct the same request twice.
+    if (
+      body.status === "approved" &&
+      existingPayment.status !== "approved" &&
+      existingPayment.requestedBy?.username
+    ) {
       const user = await UserModel.findOne({
         username: existingPayment.requestedBy.username,
       });

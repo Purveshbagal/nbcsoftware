@@ -62,21 +62,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final spent = payments.where((p) => p.handedOverToDoctor);
     final owed = payments.where((p) => p.owedToDoctor);
 
-    // Fetch budget analytics
+    // This is the administrator-assigned payment-request limit. It is
+    // deliberately separate from the payment history totals below.
     num totalBudget = 0;
     num budgetSpent = 0;
     num budgetAvailable = 0;
 
     try {
       final budgetData = await widget.apiClient.fetchBudgetAnalytics();
-      final users = budgetData['users'] as List<dynamic>? ?? [];
-
-      if (users.isNotEmpty) {
-        final userBudget = users[0] as Map<String, dynamic>;
-        totalBudget = (userBudget['totalLimit'] as num?) ?? 0;
-        budgetSpent = (userBudget['spentAmount'] as num?) ?? 0;
-        budgetAvailable = (userBudget['availableAmount'] as num?) ?? 0;
-      }
+      // A field user receives their own budget at the top level. The users
+      // collection is the admin-only response, retained as a safe fallback.
+      final users = budgetData['users'] as List<dynamic>? ?? const [];
+      final userBudget = users.isNotEmpty
+          ? Map<String, dynamic>.from(users.first as Map)
+          : budgetData;
+      totalBudget = _asNumber(userBudget['totalLimit']);
+      budgetSpent = _asNumber(userBudget['spentAmount']);
+      budgetAvailable = _asNumber(userBudget['availableAmount']);
     } catch (e) {
       // If budget fetch fails, use defaults (0)
       print('Error fetching budget: $e');
@@ -100,6 +102,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       budgetAvailable: budgetAvailable,
     );
   }
+
+  num _asNumber(Object? value) =>
+      value is num ? value : num.tryParse('$value') ?? 0;
 
   Future<void> _refresh() async {
     final next = _load();
@@ -226,25 +231,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
               final budgetColor = budgetPercentage >= 90
                   ? Colors.red
                   : budgetPercentage >= 70
-                      ? Colors.orange
-                      : Colors.green;
+                  ? Colors.orange
+                  : Colors.green;
 
               final budgetCards = [
                 _BudgetCard(
-                  label: "Total Budget",
+                  label: "Total Limit",
                   amount: stats.totalBudget,
                   icon: Icons.account_balance_wallet_outlined,
                   color: Colors.blue,
                 ),
                 _BudgetCard(
-                  label: "Budget Spent",
+                  label: "Spent Budget",
                   amount: stats.budgetSpent,
                   icon: Icons.trending_up,
                   color: budgetColor,
                   percentage: budgetPercentage,
                 ),
                 _BudgetCard(
-                  label: "Available Budget",
+                  label: "Remaining Budget",
                   amount: stats.budgetAvailable,
                   icon: Icons.savings_outlined,
                   color: Colors.green,
@@ -272,49 +277,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Budget section (only show if budget is set)
-                  if (stats.totalBudget > 0) ...[
-                    Text(
-                      "Your Budget",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Text(
+                    "Budget limit",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 12),
-                    LayoutBuilder(
-                      builder: (context, constraints) =>
-                          constraints.maxWidth < 500 || narrow
-                          ? Column(
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) =>
+                        constraints.maxWidth < 500 || narrow
+                        ? Column(
+                            children: [
+                              budgetCards[0],
+                              const SizedBox(height: 12),
+                              budgetCards[1],
+                              const SizedBox(height: 12),
+                              budgetCards[2],
+                            ],
+                          )
+                        : IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                budgetCards[0],
-                                const SizedBox(height: 12),
-                                budgetCards[1],
-                                const SizedBox(height: 12),
-                                budgetCards[2],
+                                Expanded(child: budgetCards[0]),
+                                const SizedBox(width: 12),
+                                Expanded(child: budgetCards[1]),
+                                const SizedBox(width: 12),
+                                Expanded(child: budgetCards[2]),
                               ],
-                            )
-                          : IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(child: budgetCards[0]),
-                                  const SizedBox(width: 12),
-                                  Expanded(child: budgetCards[1]),
-                                  const SizedBox(width: 12),
-                                  Expanded(child: budgetCards[2]),
-                                ],
-                              ),
                             ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "Payments",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
                           ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Payments",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
+                  const SizedBox(height: 12),
                   LayoutBuilder(
                     builder: (context, constraints) =>
                         constraints.maxWidth < 280 || narrow
@@ -340,8 +342,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Text(
                     "Activity Summary",
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   GridView.count(
@@ -392,11 +394,13 @@ class _StatCard extends StatelessWidget {
   final String label;
   final int value;
   final IconData icon;
+  final Color color;
 
   const _StatCard({
     required this.label,
     required this.value,
     required this.icon,
+    required this.color,
   });
 
   @override
@@ -411,16 +415,10 @@ class _StatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.08),
+                color: color.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                size: 22,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              child: Icon(icon, size: 22, color: color),
             ),
             Text("$value", style: Theme.of(context).textTheme.headlineMedium),
             Text(label, style: Theme.of(context).textTheme.bodySmall),

@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { serializeRegistration } from "@/lib/serialize-registration";
 import { getNextSequence } from "@/models/Counter";
 import RegistrationModel from "@/models/Registration";
+import { generateDoctorUinId } from "@/utils/doctorUinGenerator";
 
 export async function GET(request: Request) {
   const session = await getSessionFromRequest(request);
@@ -58,10 +59,9 @@ export async function POST(request: Request) {
 
   await connectToDatabase();
 
-  // Keep the mobile doctor's UIN sequence separate from retired HH doctor IDs.
-  // The first mobile doctor is MH001, followed by MH002, MH003, and so on.
-  const seq = await getNextSequence("mobileDoctorUin");
-  const doctorId = `MH${String(seq).padStart(3, "0")}`;
+  // Generate unified doctor UIN that checks across ALL doctor records (Doctor model + Registration model)
+  // This ensures no duplicate IDs between mobile labs and survey apps
+  const doctorId = await generateDoctorUinId({ source: "survey" });
 
   const registration = await RegistrationModel.create({
     doctorId,

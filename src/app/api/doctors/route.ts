@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSessionFromRequest } from '@/lib/auth';
+import { generateDoctorUinId } from '@/utils/doctorUinGenerator';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export async function GET(request: Request) {
   try {
@@ -83,9 +85,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Generate unified UIN ID
+    await connectToDatabase();
+    const uinId = await generateDoctorUinId({ source: 'mobile_app' });
+
     // Create doctor
     const doctor = await prisma.doctor.create({
       data: {
+        uinId,
         name,
         contactNo: mobileNumber,
         qualification,

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireEmployee } from "@/lib/labs-auth";
 import { readJsonBody } from "@/lib/read-json";
 import DoctorModel from "@/models/Doctor";
+import { generateDoctorUinId } from "@/utils/doctorUinGenerator";
 
 const LIST_FIELDS =
   "doctorCode uinId prefix name hospitalName hospitalAddress speciality qualification category contactNo email city pincode clinicAddress gender location bankDetails zone assignedEmployees approvalStatus";
@@ -33,6 +34,7 @@ function escapeRegex(value: string) {
 /**
  * Doctors the employee can call on: the ones assigned to them plus everyone
  * in their zone. `?q=` searches by name, hospital or city.
+ * Only shows approved doctors (or doctors without approval status for backward compatibility).
  */
 export async function GET(request: Request) {
   const auth = await requireEmployee(request);
@@ -43,7 +45,12 @@ export async function GET(request: Request) {
   const scope: Record<string, unknown>[] = [{ assignedEmployees: employee.name }];
   if (employee.zone) scope.push({ zone: employee.zone });
 
-  const query: Record<string, unknown> = { isActive: { $ne: false }, $or: scope };
+  const query: Record<string, unknown> = {
+    isActive: { $ne: false },
+    $or: scope,
+    // Only show approved doctors or doctors without approval status (for backward compatibility)
+    approvalStatus: { $in: ["approved", "", null] }
+  };
   if (search) {
     const pattern = { $regex: escapeRegex(search), $options: "i" };
     // Search by name, hospital, city, or UIN ID
@@ -54,23 +61,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ items });
 }
 
-/**
- * Generate next UIN ID in format HH001, HH002, etc.
- */
-async function generateUinId(): Promise<string> {
-  const lastDoctor = await DoctorModel.findOne({ uinId: { $regex: /^HH\d+$/ } })
-    .sort({ uinId: -1 })
-    .select("uinId")
-    .lean();
-
-  if (!lastDoctor?.uinId) {
-    return "HH001";
-  }
-
-  const lastNumber = parseInt(lastDoctor.uinId.substring(2), 10);
-  const nextNumber = lastNumber + 1;
-  return `HH${String(nextNumber).padStart(3, "0")}`;
-}
+// UIN ID generation is now handled by centralized utility: @/utils/doctorUinGenerator
 
 /** A new doctor met in the field. It is assigned to whoever added it. */
 export async function POST(request: Request) {
@@ -105,7 +96,7 @@ export async function POST(request: Request) {
   let uinId;
   let approvalStatus = "";
   if (source === "racer") {
-    uinId = await generateUinId();
+    uinId = await generateDoctorUinId({ source: "racer" });
     approvalStatus = "pending";
   }
 
