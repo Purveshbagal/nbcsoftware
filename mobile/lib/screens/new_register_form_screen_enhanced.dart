@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:file_picker/file_picker.dart";
 
 import "../services/api_client.dart";
+import "../widgets/searchable_dropdown.dart";
 
 class NewRegisterFormScreen extends StatefulWidget {
   final ApiClient apiClient;
@@ -235,38 +236,22 @@ class _NewRegisterFormScreenState extends State<NewRegisterFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Qualification Dropdown
-              DropdownButtonFormField<String>(
+              // Qualification Searchable Dropdown
+              SearchableDropdown(
+                label: "Qualification *",
+                items: _qualifications,
                 value: _selectedQualification,
-                decoration: const InputDecoration(
-                  labelText: "Qualification *",
-                  border: OutlineInputBorder(),
-                ),
-                items: _qualifications.map((qual) {
-                  return DropdownMenuItem(
-                    value: qual,
-                    child: Text(qual),
-                  );
-                }).toList(),
                 onChanged: (value) {
                   setState(() => _selectedQualification = value);
                 },
               ),
               const SizedBox(height: 12),
 
-              // Speciality Dropdown
-              DropdownButtonFormField<String>(
+              // Speciality Searchable Dropdown
+              SearchableDropdown(
+                label: "Speciality *",
+                items: _specialities,
                 value: _selectedSpeciality,
-                decoration: const InputDecoration(
-                  labelText: "Speciality *",
-                  border: OutlineInputBorder(),
-                ),
-                items: _specialities.map((spec) {
-                  return DropdownMenuItem(
-                    value: spec,
-                    child: Text(spec),
-                  );
-                }).toList(),
                 onChanged: (value) {
                   setState(() => _selectedSpeciality = value);
                 },

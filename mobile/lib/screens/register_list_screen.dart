@@ -3,9 +3,10 @@ import "dart:async";
 import "package:flutter/material.dart";
 
 import "../models/registration.dart";
+import "../models/payment.dart";
 import "../services/api_client.dart";
 import "../widgets/status_chip.dart";
-import "new_register_form_screen_enhanced.dart";
+import "doctor_selection_screen.dart";
 
 const _pollInterval = Duration(seconds: 10);
 
@@ -19,13 +20,13 @@ class RegisterListScreen extends StatefulWidget {
 }
 
 class _RegisterListScreenState extends State<RegisterListScreen> {
-  late Future<List<Registration>> _future;
+  late Future<List<Payment>> _future;
   Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    _future = widget.apiClient.fetchRegistrations();
+    _future = widget.apiClient.fetchPayments();
     _pollTimer = Timer.periodic(_pollInterval, (_) => _silentRefresh());
   }
 
@@ -36,7 +37,7 @@ class _RegisterListScreenState extends State<RegisterListScreen> {
   }
 
   Future<void> _refresh() async {
-    final next = widget.apiClient.fetchRegistrations();
+    final next = widget.apiClient.fetchPayments();
     setState(() {
       _future = next;
     });
@@ -48,34 +49,26 @@ class _RegisterListScreenState extends State<RegisterListScreen> {
   // data has arrived, so there's no loading flicker.
   Future<void> _silentRefresh() async {
     try {
-      final registrations = await widget.apiClient.fetchRegistrations();
+      final payments = await widget.apiClient.fetchPayments();
       if (!mounted) return;
       setState(() {
-        _future = Future.value(registrations);
+        _future = Future.value(payments);
       });
     } catch (_) {
       // Ignore transient polling failures; the next tick will retry.
     }
   }
 
-  Future<void> _openNewRegisterForm() async {
-    final created = await Navigator.of(context).push<Registration>(
+  Future<void> _openDoctorSelection() async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => NewRegisterFormScreen(apiClient: widget.apiClient),
+        builder: (_) => DoctorSelectionScreen(apiClient: widget.apiClient),
       ),
     );
 
-    if (created == null || !mounted) return;
-
-    await _refresh();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Submitted for approval. Doctor ID: ${created.doctorId}",
-        ),
-      ),
-    );
+    if (result == true && mounted) {
+      await _refresh();
+    }
   }
 
   @override
@@ -88,7 +81,7 @@ class _RegisterListScreenState extends State<RegisterListScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               FilledButton.icon(
-                onPressed: _openNewRegisterForm,
+                onPressed: _openDoctorSelection,
                 icon: const Icon(Icons.add),
                 label: const Text("New"),
               ),
@@ -98,7 +91,7 @@ class _RegisterListScreenState extends State<RegisterListScreen> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: _refresh,
-            child: FutureBuilder<List<Registration>>(
+            child: FutureBuilder<List<Payment>>(
               future: _future,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
@@ -115,15 +108,15 @@ class _RegisterListScreenState extends State<RegisterListScreen> {
                   );
                 }
 
-                final registrations = snapshot.data!;
-                if (registrations.isEmpty) {
+                final payments = snapshot.data!;
+                if (payments.isEmpty) {
                   return ListView(
                     children: const [
                       Padding(
                         padding: EdgeInsets.all(24),
                         child: Center(
                           child: Text(
-                            'No registrations yet. Tap "New" to submit one.',
+                            'No payment requests yet. Tap "New" to create one.',
                           ),
                         ),
                       ),
@@ -133,17 +126,28 @@ class _RegisterListScreenState extends State<RegisterListScreen> {
 
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  itemCount: registrations.length,
+                  itemCount: payments.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
-                    final registration = registrations[index];
+                    final payment = payments[index];
                     return Card(
                       child: ListTile(
-                        title: Text(registration.doctorName),
-                        subtitle: Text(
-                          "${registration.doctorId} · Reg #${registration.registrationNumber}",
+                        leading: CircleAvatar(
+                          child: Text(
+                            payment.doctorName.substring(0, 1).toUpperCase(),
+                          ),
                         ),
-                        trailing: StatusChip(status: registration.status),
+                        title: Text(payment.doctorName),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Doctor ID: ${payment.doctorId}"),
+                            Text("Product: ${payment.productName}"),
+                            Text("Amount: ₹${payment.amount}"),
+                          ],
+                        ),
+                        trailing: StatusChip(status: payment.status),
+                        isThreeLine: true,
                       ),
                     );
                   },
