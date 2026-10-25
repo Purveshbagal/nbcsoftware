@@ -6,6 +6,7 @@ import { serializePayment } from "@/lib/serialize-payment";
 import PaymentModel from "@/models/Payment";
 import ProductModel from "@/models/Product";
 import RegistrationModel from "@/models/Registration";
+import UserModel from "@/models/User";
 
 export async function PATCH(
   request: Request,
@@ -30,6 +31,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
+    const existingPayment = await PaymentModel.findById(id);
+    if (!existingPayment) {
+      return NextResponse.json(
+        { error: "Payment request not found" },
+        { status: 404 }
+      );
+    }
+
     const payment = await PaymentModel.findByIdAndUpdate(
       id,
       {
@@ -40,14 +49,24 @@ export async function PATCH(
       { new: true }
     ).lean();
 
-    if (!payment) {
-      return NextResponse.json(
-        { error: "Payment request not found" },
-        { status: 404 }
-      );
+    // Update user budget if payment is approved
+    if (body.status === "approved" && existingPayment.requestedBy?.username) {
+      const user = await UserModel.findOne({
+        username: existingPayment.requestedBy.username,
+      });
+
+      if (user?.budgetLimit) {
+        const newSpentAmount = (user.budgetLimit.spentAmount || 0) + existingPayment.amount;
+        const newAvailableAmount = (user.budgetLimit.totalLimit || 0) - newSpentAmount;
+
+        await UserModel.findByIdAndUpdate(user._id, {
+          "budgetLimit.spentAmount": newSpentAmount,
+          "budgetLimit.availableAmount": newAvailableAmount,
+        });
+      }
     }
 
-    return NextResponse.json({ payment: serializePayment(payment) });
+    return NextResponse.json({ payment: serializePayment(payment!) });
   }
 
   const existing = await PaymentModel.findById(id);

@@ -1,0 +1,746 @@
+// Prisma schema for NBC Pedia Software
+// MongoDB database setup
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+// Counter model for auto-increment sequences
+model Counter {
+  id  String @id @map("_id")
+  seq Int    @default(0)
+
+  @@map("counters")
+}
+
+// User/Administrator model
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  username String  @unique
+  password String
+  name     String  @default("Administrator")
+  role     String  @default("admin") // "admin" or "field"
+  isActive Boolean @default(true)
+
+  budgetLimit BudgetLimit?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+type BudgetLimit {
+  totalLimit      Float    @default(0)
+  spentAmount     Float    @default(0)
+  availableAmount Float    @default(0)
+  updatedAt       DateTime?
+  updatedBy       String?
+}
+
+// Employee model
+model Employee {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  code              String?
+  name              String
+  email             String?
+  contactNo         String?
+  workType          String?
+  assignTo          String?
+  city              String?
+  state             String?
+  address           String?
+  division          String?
+  zone              String?
+  designation       String?
+  reportingTo       String?
+  dateOfBirth       String?
+  dateOfJoin        String?
+  dateOfResignation String?
+  inactiveDate      String?
+  inactiveReason    String?
+  isActive          Boolean  @default(true)
+  createdBy         Creator?
+
+  // NBC Labs mobile app credentials
+  appUsername       String?       @unique
+  appPasswordHash   String?
+  appAccessEnabled  Boolean       @default(false)
+  lastLocation      LastLocation?
+  lastSeenAt        DateTime?
+  deviceInfo        String?
+
+  attendances    Attendance[]
+  locationPings  LocationPing[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("employees")
+}
+
+type LastLocation {
+  lat      Float?
+  lng      Float?
+  accuracy Float?
+  battery  Float?
+  at       DateTime?
+}
+
+type Creator {
+  username String?
+  name     String?
+}
+
+// Doctor model
+model Doctor {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorCode       String?
+  uinId            String?  @unique
+  prefix           String?  @default("Dr")
+  name             String
+  hospitalName     String?
+  hospitalAddress  String?
+  gender           String?  @default("")
+  contactNo        String?
+  email            String?
+  dateOfBirth      String?
+  anniversary      String?
+  maritalStatus    String?
+  qualification    String?
+  registrationNumber String?
+
+  state        String?
+  district     String?
+  city         String?
+  pincode      String?
+  clinicAddress String?
+
+  location     Location?
+  bankDetails  BankDetails?
+  documents    DoctorDocument[]
+
+  division     String?
+  zone         String?
+  speciality   String?
+  category     String?  @default("")
+  doctorType   String?
+  approxBusiness String?
+
+  assignedEmployees String[]
+  firms            String[]
+
+  approvalStatus String?   @default("")
+  approvedBy     Approver?
+  approvedAt     DateTime?
+  source         String?   @default("")
+
+  isActive   Boolean  @default(true)
+  createdBy  Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("doctors")
+}
+
+type DoctorDocument {
+  filename    String?
+  mimeType    String?
+  data        Bytes?
+  uploadedAt  DateTime?
+}
+
+type Location {
+  latitude  Float?
+  longitude Float?
+}
+
+type BankDetails {
+  bankName      String?
+  accountNumber String?
+  ifscCode      String?
+  branchName    String?
+}
+
+type Approver {
+  username String?
+  name     String?
+}
+
+// Firm model
+model Firm {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  firmCode             String?
+  name                 String
+  firmType             String?
+  firmCategory         String?
+  contactPerson        String?
+  contactNo            String?
+  email                String?
+  city                 String?
+  district             String?
+  state                String?
+  zone                 String?
+  division             String?
+  additionalDivisions  String[]
+  address              String?
+  pincode              String?
+  assignedEmployees    String[]
+  firstLevelManager    String?
+  secondLevelManager   String?
+  thirdLevelManager    String?
+  dateOfBirth          String?
+  approxBusiness       String?
+  transportType        String?
+  distributorCode      String?
+  stockistCode         String?
+  customerCode         String?
+
+  // KYC
+  gstin               String?
+  panNumber           String?
+  drugLicenseNumber   String?
+  foodLicenseNumber   String?
+  bankName            String?
+  branchName          String?
+  accountNumber       String?
+  ifsc                String?
+
+  isActive   Boolean  @default(true)
+  createdBy  Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("firms")
+}
+
+// Product model
+model Product {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  composition  String
+  category     String   // "syrup", "tablet", "speciality"
+  pack         String?
+  specialClaim String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}
+
+// Visit model
+model Visit {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  visitCode       String?
+  visitType       String          // "doctor" or "firm"
+  doctor          String?
+  firm            String?
+  clinicAddress   String?
+  city            String?
+  zone            String?
+  division        String?
+  employeeName    String?
+  visitDate       String?
+  plannedDate     String?
+  modeOfTransport String?         @default("")
+  callObjective   String?
+  postCallInfo    String?
+  remarks         String?
+  extraInfo       String?
+
+  productsPromoted ProductPromoted[]
+  samplesGiven     SampleGiven[]
+
+  products         String[]
+  samples          String[]
+  gifts            String[]
+  pobValue         Float?
+  skippedReason    String?
+  metDoctor        Boolean?
+  notMetReason     String?
+  photos           String[]
+
+  presentationShown Boolean?
+  presentationId    String?
+
+  employeeId  String?   @db.ObjectId
+  geo         Geo?
+  checkInAt   DateTime?
+  checkOutAt  DateTime?
+  source      String?   @default("web")
+
+  status    String   @default("planned") // "planned", "closed", "skipped", "open"
+  createdBy Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("visits")
+}
+
+type ProductPromoted {
+  productId     String?
+  productName   String?
+  isPrescribing Boolean @default(false)
+  isTop5        Boolean @default(false)
+}
+
+type SampleGiven {
+  productId   String?
+  productName String?
+  quantity    Int     @default(0)
+}
+
+type Geo {
+  lat      Float?
+  lng      Float?
+  accuracy Float?
+}
+
+// Order model
+model Order {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderNo      String?
+  orderDate    String
+  firm         String?
+  doctor       String?
+  employeeName String?
+  zone         String?
+  division     String?
+  lines        OrderLine[]
+  remarks      String?
+  status       String      @default("placed") // "draft", "placed", "approved", "dispatched", "cancelled"
+  createdBy    Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("orders")
+}
+
+type OrderLine {
+  product  String?
+  quantity Int     @default(0)
+  rate     Float   @default(0)
+  discount Float   @default(0)
+}
+
+// Expense model
+model Expense {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  employeeName String
+  zone         String?
+  division     String?
+  expenseDate  String
+  head         String?
+  modeOfTravel String?
+  fromCity     String?
+  toCity       String?
+  distanceKm   Float?
+  fare         Float?
+  otherAmount  Float?
+  remarks      String?
+  status       String    @default("pending") // "pending", "approved", "rejected"
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdBy    Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("expenses")
+}
+
+// Attendance model
+model Attendance {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId     String   @db.ObjectId
+  employeeName   String?
+  zone           String?
+  division       String?
+  date           String
+  workAgenda     String?
+  punchIn        Punch?
+  punchOut       Punch?
+  workingMinutes Int      @default(0)
+  distanceKm     Float    @default(0)
+  status         String   @default("present") // "present", "half-day", "absent"
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, date])
+  @@map("attendances")
+}
+
+type Punch {
+  at       DateTime?
+  lat      Float?
+  lng      Float?
+  accuracy Float?
+  note     String?
+}
+
+// LocationPing model
+model LocationPing {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId String   @db.ObjectId
+  date       String
+  at         DateTime
+  lat        Float
+  lng        Float
+  accuracy   Float?
+  speed      Float?
+  battery    Float?
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("locationpings")
+}
+
+// Leave model
+model Leave {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  employeeName String
+  zone         String?
+  leaveType    String?
+  reason       String?
+  fromDate     String
+  toDate       String
+  days         Int       @default(1)
+  status       String    @default("pending") // "pending", "approved", "rejected"
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdBy    Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("leaves")
+}
+
+// SampleRequest model
+model SampleRequest {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  requestNo   String?
+  requestDate String
+  employeeName String?
+  zone        String?
+  division    String?
+  itemType    String   @default("sample") // "sample" or "gift"
+  item        String?
+  quantity    Int      @default(0)
+  remarks     String?
+  status      String   @default("pending") // "pending", "approved", "denied", "dispatched"
+  createdBy   Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("samplerequests")
+}
+
+// Target model
+model Target {
+  id                  String  @id @default(auto()) @map("_id") @db.ObjectId
+  targetType          String  // "employee", "hq", "product", "doctor", "firm", "product-group", "yearly"
+  subject             String?
+  employeeName        String?
+  frequency           String  @default("monthly") // "monthly", "quarterly", "yearly"
+  month               String?
+  quarter             String?
+  year                String?
+  pobValue            Float?
+  secondarySales      Float?
+  doctorVisits        Float?
+  chemistVisits       Float?
+  newDoctorAddition   Float?
+  newChemistAddition  Float?
+  primarySalesValue   Float?
+  primarySalesQty     Float?
+  createdBy           Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("targets")
+}
+
+// Payment model
+model Payment {
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId             String
+  doctorName           String
+  productId            String
+  productName          String
+  productComposition   String?
+  amount               Float
+  purpose              String?
+  status               String         @default("pending") // "pending", "approved", "rejected"
+  requestedBy          RequestedBy
+  reviewedBy           ReviewedBy?
+  reviewedAt           DateTime?
+  surveyFormNo         String?
+  surveyDownloadedAt   DateTime?
+  surveyUpload         SurveyUpload?
+  receiptNumber        String?
+  transactionRefNumber String?
+  tdsAmount            Float?
+  netAmount            Float?
+  paidAt               DateTime?
+  paidBy               PaidBy?
+  handedOverAt         DateTime?
+  handedOverBy         HandedOverBy?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
+
+type RequestedBy {
+  username String
+  name     String
+}
+
+type ReviewedBy {
+  username String?
+  name     String?
+}
+
+type SurveyUpload {
+  data       Bytes?
+  mimeType   String?
+  uploadedAt DateTime?
+}
+
+type PaidBy {
+  username String?
+  name     String?
+}
+
+type HandedOverBy {
+  username String?
+  name     String?
+}
+
+// Setting model
+model Setting {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  group     String
+  key       String
+  value     String?  @default("")
+  updatedBy Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([group, key])
+  @@map("settings")
+}
+
+// Additional models
+
+model Administrator {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  username String  @unique
+  password String
+  name     String  @default("Administrator")
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("administrators")
+}
+
+model Registration {
+  id                 String            @id @default(auto()) @map("_id") @db.ObjectId
+  doctorName         String
+  mobileNumber       String
+  qualification      String
+  speciality         String
+  category           String            // "Important", "Super Important", "A"
+  gender             String
+  hospitalName       String
+  hospitalAddress    String
+  email              String?
+  bankDetails        BankDetails?
+  documents          DoctorDocument[]
+
+  status             String            @default("pending") // "pending", "approved", "rejected"
+  requestedBy        RequestedBy
+  reviewedBy         ReviewedBy?
+  reviewedAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("registrations")
+}
+
+model Entitlement {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  amount      Float
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("entitlements")
+}
+
+model FareChart {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  fromCity    String
+  toCity      String
+  distance    Float
+  fare        Float
+  mode        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("farecharts")
+}
+
+model Holiday {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  date        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("holidays")
+}
+
+model MasterItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  category    String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("masteritems")
+}
+
+model MediaAsset {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  type        String   // "image", "video", "document"
+  url         String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mediaassets")
+}
+
+model MonthMaintenance {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  month     String
+  year      String
+  isLocked  Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([month, year])
+  @@map("monthmaintenances")
+}
+
+model Reminder {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  date        String
+  time        String?
+  isActive    Boolean  @default(true)
+  createdBy   Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reminders")
+}
+
+model SfaProduct {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  category    String?
+  description String?
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sfaproducts")
+}
+
+model SupportTicket {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  subject     String
+  description String
+  status      String   @default("open") // "open", "in-progress", "closed"
+  priority    String   @default("medium") // "low", "medium", "high"
+  createdBy   Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("supporttickets")
+}
+
+model DoctorQualification {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("doctorqualifications")
+}
+
+model DoctorSpeciality {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("doctorspecialities")
+}
+
+model Presentation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  fileUrl     String
+  isActive    Boolean  @default(true)
+  createdBy   Creator?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("presentations")
+}

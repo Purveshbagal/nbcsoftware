@@ -6,6 +6,7 @@ import { serializePayment } from "@/lib/serialize-payment";
 import PaymentModel from "@/models/Payment";
 import ProductModel from "@/models/Product";
 import RegistrationModel from "@/models/Registration";
+import UserModel from "@/models/User";
 
 export async function GET(request: Request) {
   const session = await getSessionFromRequest(request);
@@ -61,9 +62,10 @@ export async function POST(request: Request) {
 
   await connectToDatabase();
 
-  const [registration, product] = await Promise.all([
+  const [registration, product, user] = await Promise.all([
     RegistrationModel.findOne({ doctorId, status: "approved" }),
     ProductModel.findById(productId),
+    UserModel.findOne({ username: session.username }),
   ]);
 
   if (!registration) {
@@ -74,6 +76,31 @@ export async function POST(request: Request) {
   }
   if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 400 });
+  }
+
+  // Check budget limit for field users
+  if (session.role === "field" && user?.budgetLimit) {
+    const { totalLimit, spentAmount, availableAmount } = user.budgetLimit;
+
+    if (totalLimit > 0) {
+      // Get pending payment requests for this user
+      const pendingPayments = await PaymentModel.find({
+        "requestedBy.username": session.username,
+        status: "pending",
+      });
+
+      const pendingTotal = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
+      const totalRequested = spentAmount + pendingTotal + parsedAmount;
+
+      if (totalRequested > totalLimit) {
+        return NextResponse.json(
+          {
+            error: `Budget limit exceeded. Total limit: ${totalLimit}, Spent: ${spentAmount}, Pending: ${pendingTotal}, Requested: ${parsedAmount}, Available: ${availableAmount - pendingTotal}`,
+          },
+          { status: 400 }
+        );
+      }
+    }
   }
 
   const payment = await PaymentModel.create({

@@ -13,6 +13,8 @@ const userSchema = new Schema(
       totalLimit: { type: Number, default: 0 }, // Total budget limit assigned by admin
       spentAmount: { type: Number, default: 0 }, // Amount already spent/approved
       availableAmount: { type: Number, default: 0 }, // Remaining budget (calculated: totalLimit - spentAmount)
+      updatedAt: { type: Date }, // When the budget was last updated
+      updatedBy: { type: String }, // Who updated the budget
     },
   },
   { timestamps: true }

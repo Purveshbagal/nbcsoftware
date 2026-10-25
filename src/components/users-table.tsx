@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, Loader2, Trash2, Users as UsersIcon } from "lucide-react";
+import { KeyRound, Loader2, Trash2, Users as UsersIcon, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -44,6 +44,11 @@ function UserRowActions({ user }: { user: UserRecord }) {
   const [resetting, setResetting] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
+  const [budgetOpen, setBudgetOpen] = React.useState(false);
+  const [budgetLimit, setBudgetLimit] = React.useState(
+    user.budgetLimit?.totalLimit?.toString() || ""
+  );
+  const [updatingBudget, setUpdatingBudget] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   async function toggleActive() {
@@ -117,8 +122,40 @@ function UserRowActions({ user }: { user: UserRecord }) {
     }
   }
 
+  async function handleUpdateBudget(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setUpdatingBudget(true);
+
+    try {
+      const res = await fetch(`/api/users/${user._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ budgetLimit: Number(budgetLimit) }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Failed to update budget limit");
+        return;
+      }
+
+      toast.success("Budget limit updated successfully!");
+      setBudgetOpen(false);
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setUpdatingBudget(false);
+    }
+  }
+
   return (
     <div className="flex justify-end gap-2">
+      <Button size="sm" variant="outline" onClick={() => setBudgetOpen(true)}>
+        <IndianRupee />
+        Budget Limit
+      </Button>
       <Button size="sm" variant="outline" onClick={() => setResetOpen(true)}>
         <KeyRound />
         Reset Password
@@ -207,6 +244,59 @@ function UserRowActions({ user }: { user: UserRecord }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={budgetOpen} onOpenChange={setBudgetOpen}>
+        <DialogContent>
+          <form onSubmit={handleUpdateBudget} className="flex flex-col gap-4">
+            <DialogHeader>
+              <DialogTitle>Update Budget Limit</DialogTitle>
+              <DialogDescription>
+                Set the total budget limit for {user.name} ({user.username}).
+                {user.budgetLimit && (
+                  <div className="mt-2 space-y-1 text-sm">
+                    <div>Current Limit: ₹{user.budgetLimit.totalLimit || 0}</div>
+                    <div>Spent: ₹{user.budgetLimit.spentAmount || 0}</div>
+                    <div>Available: ₹{user.budgetLimit.availableAmount || 0}</div>
+                  </div>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-2">
+              <Label htmlFor={`budget-limit-${user._id}`}>
+                Total Budget Limit (₹)
+              </Label>
+              <Input
+                id={`budget-limit-${user._id}`}
+                type="number"
+                min="0"
+                step="0.01"
+                value={budgetLimit}
+                onChange={(e) => setBudgetLimit(e.target.value)}
+                placeholder="Enter amount in rupees"
+                required
+                autoFocus
+              />
+              <p className="text-muted-foreground text-xs">
+                User can request payments up to this limit. Set to 0 for unlimited.
+              </p>
+            </div>
+
+            {error && (
+              <p className="text-destructive text-sm" role="alert">
+                {error}
+              </p>
+            )}
+
+            <DialogFooter>
+              <Button type="submit" disabled={updatingBudget}>
+                {updatingBudget && <Loader2 className="size-4 animate-spin" />}
+                Update Budget
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -234,6 +324,8 @@ export function UsersTable({ users }: { users: UserRecord[] }) {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Username</TableHead>
+            <TableHead>Budget Limit</TableHead>
+            <TableHead>Available</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -245,6 +337,16 @@ export function UsersTable({ users }: { users: UserRecord[] }) {
               <TableCell className="font-medium">{user.name}</TableCell>
               <TableCell className="font-mono text-xs">
                 {user.username}
+              </TableCell>
+              <TableCell className="font-medium">
+                {user.budgetLimit?.totalLimit
+                  ? `₹${user.budgetLimit.totalLimit.toLocaleString("en-IN")}`
+                  : "-"}
+              </TableCell>
+              <TableCell className="text-green-600">
+                {user.budgetLimit?.availableAmount !== undefined
+                  ? `₹${user.budgetLimit.availableAmount.toLocaleString("en-IN")}`
+                  : "-"}
               </TableCell>
               <TableCell>
                 <Badge variant={user.isActive ? "default" : "secondary"}>

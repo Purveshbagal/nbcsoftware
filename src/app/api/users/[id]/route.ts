@@ -18,7 +18,7 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const { isActive, password } = await request.json();
+  const { isActive, password, budgetLimit } = await request.json();
 
   const update: Record<string, unknown> = {};
   if (typeof isActive === "boolean") {
@@ -26,6 +26,32 @@ export async function PATCH(
   }
   if (password) {
     update.password = await bcrypt.hash(password, 10);
+  }
+  if (budgetLimit !== undefined) {
+    if (isNaN(Number(budgetLimit)) || Number(budgetLimit) < 0) {
+      return NextResponse.json(
+        { error: "Budget limit must be a valid positive number" },
+        { status: 400 }
+      );
+    }
+
+    // Get current user to preserve spent amount
+    await connectToDatabase();
+    const currentUser = await UserModel.findById(id);
+    if (!currentUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const limitAmount = Number(budgetLimit);
+    const spentAmount = currentUser.budgetLimit?.spentAmount || 0;
+
+    update.budgetLimit = {
+      totalLimit: limitAmount,
+      spentAmount: spentAmount,
+      availableAmount: limitAmount - spentAmount,
+      updatedAt: new Date(),
+      updatedBy: session.username,
+    };
   }
 
   if (Object.keys(update).length === 0) {
