@@ -40,11 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# flutter mobile apps: build output and local logs
-/mobile*/build/
-/mobile*/android/build/
-/mobile*/build-apk.log
-/mobile*/flutter_*.log
-/mobile*/android/hs_err_pid*.log
-/mobile*/android/replay_pid*.log
-/mobile*/android/.kotlin/
+# flutter mobile apps: completely excluded
+/mobile/
+/mobile-labs/
