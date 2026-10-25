@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/session';
+import { getSessionFromRequest } from '@/lib/auth';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSessionFromRequest(request);
     if (!session) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -15,8 +15,9 @@ export async function GET(
       );
     }
 
+    const { id } = await params;
     const doctor = await prisma.doctor.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!doctor) {
@@ -41,10 +42,10 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSessionFromRequest(request);
     if (!session) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -63,8 +64,9 @@ export async function PATCH(
       );
     }
 
+    const { id } = await params;
     const doctor = await prisma.doctor.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...updateData,
         ...(approvalStatus && {
@@ -93,10 +95,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSessionFromRequest(request);
     if (!session || session.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -104,8 +106,9 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
     await prisma.doctor.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({

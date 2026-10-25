@@ -5,4 +5,11 @@ export type UserRecord = {
   role: "admin" | "field";
   isActive: boolean;
   createdAt?: Date | string;
+  budgetLimit?: {
+    totalLimit?: number;
+    spentAmount?: number;
+    availableAmount?: number;
+    updatedAt?: Date | string;
+    updatedBy?: string;
+  };
 };
