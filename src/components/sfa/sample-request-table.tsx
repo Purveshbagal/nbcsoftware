@@ -135,21 +135,21 @@ export function SampleRequestTable({
               <div className="grid gap-2">
                 <Label className="text-sm font-medium">Employee</Label>
                 <div className="text-sm text-muted-foreground">
-                  {selectedRequest.employeeName || "-"}
+                  {String(selectedRequest.employeeName || "-")}
                 </div>
               </div>
 
               <div className="grid gap-2">
                 <Label className="text-sm font-medium">Item</Label>
                 <div className="text-sm text-muted-foreground">
-                  {selectedRequest.item || "-"}
+                  {String(selectedRequest.item || "-")}
                 </div>
               </div>
 
               <div className="grid gap-2">
                 <Label className="text-sm font-medium">Item Type</Label>
                 <div className="text-sm text-muted-foreground">
-                  {selectedRequest.itemType || "-"}
+                  {String(selectedRequest.itemType || "-")}
                 </div>
               </div>
 
@@ -168,14 +168,14 @@ export function SampleRequestTable({
                 />
               </div>
 
-              {selectedRequest.remarks && (
+              {selectedRequest.remarks ? (
                 <div className="grid gap-2">
                   <Label className="text-sm font-medium">Remarks</Label>
                   <div className="text-sm text-muted-foreground">
-                    {selectedRequest.remarks}
+                    {String(selectedRequest.remarks)}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
 
