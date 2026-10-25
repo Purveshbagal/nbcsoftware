@@ -81,11 +81,16 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
     final geo = _visit?["geo"] as Map?;
     final lat = geo?["lat"];
     final lng = geo?["lng"];
-    if (lat == null || lng == null) {
-      if (mounted) showError(context, "This doctor has no saved location yet.");
+    final destination = lat != null && lng != null
+        ? "$lat,$lng"
+        : (_visit?["clinicAddress"]?.toString().trim().isNotEmpty == true
+            ? _visit!["clinicAddress"].toString()
+            : _visit?["doctor"]?.toString() ?? "");
+    if (destination.isEmpty) {
+      if (mounted) showError(context, "This visit has no doctor address or location.");
       return;
     }
-    final uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng");
+    final uri = Uri.https("www.google.com", "/maps/dir/", {"api": "1", "destination": destination});
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
       showError(context, "Could not open Maps.");
     }
@@ -261,11 +266,10 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
       );
     }
 
-    final doctor = _visit!["doctor"] ?? {};
+    final doctor = _visit!["doctor"];
     final status = _visit!["status"] ?? "planned";
-    final hasDirections = (_visit!["geo"] as Map?)?["lat"] != null;
-    final doctorName = doctor["name"] ?? "Unknown Doctor";
-    final hospitalName = doctor["hospitalName"] ?? "N/A";
+    final doctorName = doctor is Map ? doctor["name"]?.toString() ?? "Unknown Doctor" : doctor?.toString() ?? "Unknown Doctor";
+    final hospitalName = doctor is Map ? doctor["hospitalName"]?.toString() ?? "" : _visit!["clinicAddress"]?.toString() ?? "";
     final plannedDate = _visit!["plannedDate"] != null
         ? DateTime.parse(_visit!["plannedDate"])
         : null;
@@ -338,13 +342,12 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
           const SizedBox(height: 16),
 
-          if (hasDirections)
-            OutlinedButton.icon(
-              onPressed: _getDirections,
-              icon: const Icon(Icons.directions),
-              label: const Text("Get directions"),
-            ),
-          if (hasDirections) const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _getDirections,
+            icon: const Icon(Icons.directions),
+            label: const Text("Get directions"),
+          ),
+          const SizedBox(height: 12),
 
           // Check-in Button (if planned)
           if (status == "planned")

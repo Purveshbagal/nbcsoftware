@@ -31,18 +31,22 @@ export async function GET(request: Request) {
   if (status === "planned") {
     // Future appointments remain in Planned until their scheduled date.
     query.status = "planned";
-    query.plannedDate = { $gt: today };
   } else if (status === "open") {
     // A planned call automatically appears in Open on its scheduled day.
-    query.$or = [
-      { status: "open" },
-      { status: "planned", plannedDate: { $lte: today } },
-    ];
+    query.$or = [{ status: "open" }, { status: "planned" }];
   } else if (status === "closed" || status === "skipped") {
     query.status = status;
   }
 
-  const items = await VisitModel.find(query).sort({ plannedDate: -1, visitDate: -1, createdAt: -1 }).limit(200).lean();
+  const rows = await VisitModel.find(query).sort({ plannedDate: -1, visitDate: -1, createdAt: -1 }).limit(500).lean();
+  // Older builds saved an ISO timestamp while newer builds save YYYY-MM-DD.
+  // Compare only the date segment so both move tabs correctly at midnight.
+  const dateKey = (value: unknown) => String(value ?? "").slice(0, 10);
+  const items = status === "planned"
+    ? rows.filter((row) => dateKey(row.plannedDate) > today)
+    : status === "open"
+      ? rows.filter((row) => row.status === "open" || dateKey(row.plannedDate) <= today)
+      : rows;
   return NextResponse.json({ items });
 }
 
