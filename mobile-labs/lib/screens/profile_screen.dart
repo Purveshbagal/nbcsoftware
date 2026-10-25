@@ -37,7 +37,7 @@ class ProfileScreen extends StatelessWidget {
                   backgroundColor: AppTheme.indigo,
                   child: Text(
                     name.isEmpty ? "?" : name.trim().split(RegExp(r"\s+")).take(2).map((w) => w[0].toUpperCase()).join(),
-                    style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
+                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),

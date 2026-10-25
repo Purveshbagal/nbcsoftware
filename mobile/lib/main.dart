@@ -16,7 +16,7 @@ class NbcPediaFieldApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "NBC Pedia Field",
+      title: "Survey NBC",
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       home: const _Bootstrap(),

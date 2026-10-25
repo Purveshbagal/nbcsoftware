@@ -129,7 +129,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                         leading: CircleAvatar(
-                          backgroundColor: isDoctor ? const Color(0xFFE8E8FB) : const Color(0xFFDDF5EA),
+                          backgroundColor: isDoctor ? AppTheme.primarySoft : AppTheme.emeraldSoft,
                           child: Icon(
                             isDoctor ? Icons.medical_services_rounded : Icons.storefront_rounded,
                             color: isDoctor ? AppTheme.indigo : AppTheme.emerald,

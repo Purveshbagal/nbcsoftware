@@ -54,6 +54,20 @@ class Payment {
 
   bool get handedOverToDoctor => handedOverAt != null;
 
+  /// Net amount once the admin has deducted TDS, otherwise the requested amount.
+  num get payableAmount => netAmount ?? amount;
+
+  /// Approved but not yet handed to the doctor — money still owed.
+  bool get owedToDoctor => status == "approved" && !handedOverToDoctor;
+
+  /// Where an owed payment is on its way to the doctor.
+  String get ledgerStage {
+    if (handedOverToDoctor) return "Given";
+    if (paymentGiven) return "Ready to give";
+    if (surveyUploaded) return "Awaiting admin payment";
+    return "Awaiting survey";
+  }
+
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
       id: json["_id"] as String? ?? "",

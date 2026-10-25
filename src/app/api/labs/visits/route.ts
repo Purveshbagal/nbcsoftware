@@ -25,7 +25,13 @@ export async function GET(request: Request) {
   const type = url.searchParams.get("type");
   if (type === "doctor" || type === "firm") query.visitType = type;
 
-  const items = await VisitModel.find(query).sort({ visitDate: -1, createdAt: -1 }).limit(200).lean();
+  // Filter by status: planned, open, closed, skipped
+  const status = url.searchParams.get("status");
+  if (status && ["planned", "open", "closed", "skipped"].includes(status)) {
+    query.status = status;
+  }
+
+  const items = await VisitModel.find(query).sort({ plannedDate: -1, visitDate: -1, createdAt: -1 }).limit(200).lean();
   return NextResponse.json({ items });
 }
 

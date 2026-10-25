@@ -55,7 +55,7 @@ class TargetsScreen extends StatelessWidget {
                           child: LinearProgressIndicator(
                             minHeight: 10,
                             value: goal > 0 ? (done / goal).clamp(0, 1).toDouble() : 0,
-                            backgroundColor: const Color(0xFFEDEDF7),
+                            backgroundColor: AppTheme.primarySoft,
                             color: goal > 0 && done >= goal ? AppTheme.emerald : AppTheme.indigo,
                           ),
                         ),

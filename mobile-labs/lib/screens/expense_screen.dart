@@ -89,7 +89,7 @@ class _Figure extends StatelessWidget {
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
       ],
     );
   }

@@ -72,7 +72,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                           children: [
                             Text(str(b["leaveType"]), maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                             const SizedBox(height: 4),
-                            Text("${b["available"]}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppTheme.indigo)),
+                            Text("${b["available"]}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.indigo)),
                             Text("of ${b["entitled"]} · ${b["used"]} used", style: Theme.of(context).textTheme.bodySmall),
                           ],
                         ),

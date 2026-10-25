@@ -35,7 +35,7 @@ class HolidaysScreen extends StatelessWidget {
                     opacity: str(h["date"]).compareTo(today) < 0 ? 0.5 : 1,
                     child: RecordTile(
                       leading: CircleAvatar(
-                        backgroundColor: const Color(0xFFFFF0D9),
+                        backgroundColor: AppTheme.amberSoft,
                         child: Text(
                           str(h["date"]).length >= 10 ? str(h["date"]).substring(8, 10) : "",
                           style: const TextStyle(color: AppTheme.amber, fontWeight: FontWeight.w700),

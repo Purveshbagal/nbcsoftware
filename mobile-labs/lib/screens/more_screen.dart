@@ -9,10 +9,8 @@ import "holidays_screen.dart";
 import "leave_screen.dart";
 import "media_screen.dart";
 import "orders_screen.dart";
-import "permissions_screen.dart";
 import "profile_screen.dart";
 import "reminders_screen.dart";
-import "sample_requests_screen.dart";
 import "support_screen.dart";
 import "targets_screen.dart";
 
@@ -37,8 +35,14 @@ class MoreScreen extends StatelessWidget {
               : "You will need your login ID and password to sign in again.",
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text("Sign out")),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Sign out"),
+          ),
         ],
       ),
     );
@@ -47,35 +51,79 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groups = <(String, List<(IconData, String, Widget)>)>[
+    final groups = <(String, List<(IconData, String, String, Widget)>)>[
       (
         "Field work",
         [
-          (Icons.contacts_rounded, "Doctors & Firms", const DirectoryScreen()),
-          (Icons.shopping_cart_rounded, "Orders", const OrdersScreen()),
-          (Icons.medication_rounded, "Samples & gifts", const SampleRequestsScreen()),
-          (Icons.slideshow_rounded, "E-detailing", const MediaScreen()),
-          (Icons.flag_rounded, "My targets", const TargetsScreen()),
-          (Icons.task_alt_rounded, "Tasks", const RemindersScreen()),
+          (
+            Icons.contacts_outlined,
+            "Doctors & firms",
+            "Your field directory",
+            const DirectoryScreen(),
+          ),
+          (
+            Icons.shopping_bag_outlined,
+            "Orders",
+            "Book and track orders",
+            const OrdersScreen(),
+          ),
+          (
+            Icons.slideshow_rounded,
+            "E-detailing",
+            "Product presentations",
+            const MediaScreen(),
+          ),
+          (
+            Icons.flag_outlined,
+            "My targets",
+            "Progress and performance",
+            const TargetsScreen(),
+          ),
+          (
+            Icons.task_alt_rounded,
+            "Tasks",
+            "Reminders and follow-ups",
+            const RemindersScreen(),
+          ),
         ],
       ),
       (
-        "HR",
+        "Work & attendance",
         [
-          (Icons.beach_access_rounded, "Leave", const LeaveScreen()),
-          (Icons.receipt_long_rounded, "Expenses", const ExpenseScreen()),
-          (Icons.event_rounded, "Holidays", const HolidaysScreen()),
+          (
+            Icons.beach_access_outlined,
+            "Leave",
+            "Requests and approvals",
+            const LeaveScreen(),
+          ),
+          (
+            Icons.receipt_long_outlined,
+            "Expenses",
+            "Submit and track claims",
+            const ExpenseScreen(),
+          ),
+          (
+            Icons.event_outlined,
+            "Holidays",
+            "Plan your calendar",
+            const HolidaysScreen(),
+          ),
         ],
       ),
       (
         "Account",
         [
-          (Icons.person_rounded, "Profile", const ProfileScreen()),
-          (Icons.support_agent_rounded, "Support", const SupportScreen()),
           (
-            Icons.admin_panel_settings_rounded,
-            "Permissions",
-            Builder(builder: (context) => PermissionsScreen(revisit: true, onDone: () async => Navigator.of(context).pop())),
+            Icons.person_outline_rounded,
+            "Profile",
+            "Your details and password",
+            const ProfileScreen(),
+          ),
+          (
+            Icons.support_agent_rounded,
+            "Support",
+            "Get help from your team",
+            const SupportScreen(),
           ),
         ],
       ),
@@ -84,65 +132,210 @@ class MoreScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("More")),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
         children: [
           Card(
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(14),
-              leading: CircleAvatar(
-                backgroundColor: AppTheme.indigo,
-                child: Text(session.name.isEmpty ? "?" : session.name[0].toUpperCase(), style: const TextStyle(color: Colors.white)),
-              ),
-              title: Text(session.name, style: Theme.of(context).textTheme.titleMedium),
-              subtitle: Text([session.designation, session.zone].where((s) => s.isNotEmpty).join(" · ")),
-              trailing: const Icon(Icons.chevron_right_rounded),
+            color: AppTheme.navy,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
               onTap: () => _open(context, const ProfileScreen()),
+              child: Ink(
+                decoration: const BoxDecoration(gradient: AppTheme.brandGradient),
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        session.name.isEmpty
+                            ? "?"
+                            : session.name.characters.first.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "MY WORKSPACE",
+                            style: TextStyle(
+                              color: AppTheme.onNavySubtle,
+                              fontSize: 9,
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            session.name.isEmpty
+                                ? session.username
+                                : session.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (session.designation.isNotEmpty ||
+                              session.zone.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              [
+                                session.designation,
+                                session.zone,
+                              ].where((s) => s.isNotEmpty).join(" · "),
+                              style: const TextStyle(
+                                color: AppTheme.onNavyMuted,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: AppTheme.onNavyMuted,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           for (final (title, items) in groups) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+              padding: const EdgeInsets.fromLTRB(2, 24, 2, 10),
               child: Text(
                 title.toUpperCase(),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppTheme.muted),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                  color: AppTheme.muted,
+                ),
               ),
             ),
-            GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.05,
-              children: [
-                for (final (icon, label, screen) in items)
-                  Card(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => _open(context, screen),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(icon, color: AppTheme.indigo, size: 28),
-                          const SizedBox(height: 8),
-                          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var index = 0; index < items.length; index++) ...[
+                    _MenuRow(
+                      icon: items[index].$1,
+                      title: items[index].$2,
+                      subtitle: items[index].$3,
+                      accent: title == "Work & attendance"
+                          ? AppTheme.emerald
+                          : AppTheme.indigo,
+                      onTap: () => _open(context, items[index].$4),
                     ),
-                  ),
-              ],
+                    if (index < items.length - 1)
+                      const Divider(indent: 62, endIndent: 16, height: 1),
+                  ],
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 24),
           OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.danger,
+              backgroundColor: Colors.white,
+            ),
             onPressed: () => _confirmSignOut(context),
-            icon: const Icon(Icons.logout_rounded),
+            icon: const Icon(Icons.logout_rounded, size: 18),
             label: const Text("Sign out"),
           ),
           const SizedBox(height: 12),
-          Text("NBC Labs field app · ${session.username}", textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            "NBC Labs · ${session.username}",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(fontSize: 10.5),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _MenuRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color accent;
+  final VoidCallback onTap;
+
+  const _MenuRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.09),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: accent, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(fontSize: 10.5),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppTheme.muted,
+              size: 19,
+            ),
+          ],
+        ),
       ),
     );
   }

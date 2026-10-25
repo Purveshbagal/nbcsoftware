@@ -19,6 +19,8 @@ type LiveEmployee = {
   punchInAt: string | null;
   punchOutAt: string | null;
   visitsToday: number;
+  /** Today's route as `[lat, lng, epochMs]`. */
+  trail: [number, number, number][];
 };
 
 type TrailVisit = {
@@ -48,6 +50,123 @@ const REFRESH_MS = 30_000;
 /** No fix for this long while on duty means the phone has gone quiet. */
 const STALE_MS = 15 * 60_000;
 const INDIA_CENTER: [number, number] = [20.59, 78.96];
+/** A silence longer than this between two fixes is drawn as "no signal". */
+const GAP_MS = 15 * 60_000;
+/** One route colour per employee on the live map. */
+const ROUTE_COLORS = ["#2563eb", "#db2777", "#ea580c", "#7c3aed", "#0891b2", "#65a30d", "#c026d3", "#b45309"];
+
+type RoutePoint = { lat: number; lng: number; t: number };
+
+function metersBetween(a: RoutePoint, b: RoutePoint) {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6_371_000 * 2 * Math.asin(Math.sqrt(h));
+}
+
+/** Compass bearing from a to b, in degrees clockwise from north. */
+function bearing(a: RoutePoint, b: RoutePoint) {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const y = Math.sin(toRad(b.lng - a.lng)) * Math.cos(toRad(b.lat));
+  const x =
+    Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) -
+    Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lng - a.lng));
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
+/**
+ * Draw a route the way a maps app does: a coloured line with a white casing,
+ * arrows showing the direction of travel, and dashed grey where the phone
+ * went quiet. `timeDots` adds a dot every 15 minutes that shows the time.
+ */
+function drawRoute(
+  L: typeof Leaflet,
+  group: Leaflet.LayerGroup,
+  points: RoutePoint[],
+  options: { color: string; weight: number; label?: string; timeDots?: boolean; arrowCount?: number }
+) {
+  if (points.length < 2) return;
+  const { color, weight, label, timeDots = false, arrowCount = 20 } = options;
+
+  // Split where the phone went quiet, so a gap is not drawn as a road.
+  const segments: RoutePoint[][] = [[points[0]]];
+  for (let i = 1; i < points.length; i++) {
+    const previous = points[i - 1];
+    const point = points[i];
+    if (point.t - previous.t > GAP_MS) {
+      L.polyline(
+        [
+          [previous.lat, previous.lng],
+          [point.lat, point.lng],
+        ],
+        { color: "#64748b", weight: 3, opacity: 0.8, dashArray: "6 8" }
+      )
+        .bindTooltip(
+          `No signal ${clock(new Date(previous.t).toISOString())} – ${clock(new Date(point.t).toISOString())}`,
+          { sticky: true }
+        )
+        .addTo(group);
+      segments.push([point]);
+    } else {
+      segments[segments.length - 1].push(point);
+    }
+  }
+
+  for (const segment of segments) {
+    if (segment.length < 2) continue;
+    const latLngs = segment.map((p) => [p.lat, p.lng] as [number, number]);
+    L.polyline(latLngs, { color: "#ffffff", weight: weight + 4, opacity: 0.9, lineJoin: "round", lineCap: "round" }).addTo(group);
+    const line = L.polyline(latLngs, { color, weight, opacity: 0.95, lineJoin: "round", lineCap: "round" }).addTo(group);
+    if (label) line.bindTooltip(label, { sticky: true });
+  }
+
+  // Direction arrows, spaced evenly along the parts actually travelled.
+  // Gaps count for nothing, or arrows would land off the line after one.
+  const isGap = (a: RoutePoint, b: RoutePoint) => b.t - a.t > GAP_MS;
+  let total = 0;
+  for (let i = 1; i < points.length; i++) {
+    if (!isGap(points[i - 1], points[i])) total += metersBetween(points[i - 1], points[i]);
+  }
+  const spacing = Math.max(150, total / arrowCount);
+  let travelled = 0;
+  let nextArrow = spacing / 2;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+    if (isGap(a, b)) continue;
+    const hop = metersBetween(a, b);
+    if (hop > 0) {
+      while (travelled + hop >= nextArrow) {
+        const f = (nextArrow - travelled) / hop;
+        const at: [number, number] = [a.lat + (b.lat - a.lat) * f, a.lng + (b.lng - a.lng) * f];
+        L.marker(at, {
+          interactive: false,
+          keyboard: false,
+          icon: L.divIcon({
+            className: "",
+            html: `<svg width="18" height="18" viewBox="0 0 14 14" style="transform:rotate(${bearing(a, b)}deg);display:block"><path d="M7 1 L12.5 12 L7 9.2 L1.5 12 Z" fill="${color}" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          }),
+        }).addTo(group);
+        nextArrow += spacing;
+      }
+    }
+    travelled += hop;
+  }
+
+  if (timeDots) {
+    let nextDot = points[0].t + GAP_MS;
+    for (const point of points) {
+      if (point.t < nextDot) continue;
+      L.circleMarker([point.lat, point.lng], { radius: 4, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1 })
+        .bindTooltip(clock(new Date(point.t).toISOString()), { direction: "top" })
+        .addTo(group);
+      nextDot = point.t + GAP_MS;
+    }
+  }
+}
 
 function dutyState(employee: LiveEmployee) {
   if (employee.punchOutAt) return { label: "Day ended", tone: "outline" as const, color: "#64748b" };
@@ -104,6 +223,7 @@ export function TrackingMap() {
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
   const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
+  const [showRoutes, setShowRoutes] = React.useState(true);
 
   const [selected, setSelected] = React.useState<LiveEmployee | null>(null);
   const [date, setDate] = React.useState(todayIst);
@@ -192,16 +312,28 @@ export function TrackingMap() {
     if (!ready || !L || !layer.current || selected) return;
     layer.current.clearLayers();
 
+    const group = layer.current;
     const bounds: [number, number][] = [];
-    for (const employee of employees) {
-      if (!employee.lastLocation) continue;
+    employees.forEach((employee, index) => {
+      const routeColor = ROUTE_COLORS[index % ROUTE_COLORS.length];
+      const hasRoute = showRoutes && employee.trail.length > 1;
+      if (hasRoute) {
+        const points = employee.trail.map(([lat, lng, t]) => ({ lat, lng, t }));
+        drawRoute(L, group, points, { color: routeColor, weight: 4, label: employee.name, arrowCount: 8 });
+        L.circleMarker([points[0].lat, points[0].lng], { radius: 5, color: "#fff", weight: 2, fillColor: routeColor, fillOpacity: 1 })
+          .bindTooltip(`${employee.name} · started ${clock(new Date(points[0].t).toISOString())}`)
+          .addTo(group);
+        for (const point of points) bounds.push([point.lat, point.lng]);
+      }
+
+      if (!employee.lastLocation) return;
       const { lat, lng } = employee.lastLocation;
       const state = dutyState(employee);
       bounds.push([lat, lng]);
       L.marker([lat, lng], {
         icon: L.divIcon({
           className: "",
-          html: `<div style="background:${state.color};color:#fff;border:2px solid #fff;border-radius:999px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:600 12px system-ui;box-shadow:0 2px 6px rgba(0,0,0,.35)">${escapeHtml(initials(employee.name))}</div>`,
+          html: `<div style="background:${state.color};color:#fff;border:3px solid ${hasRoute ? routeColor : "#fff"};border-radius:999px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:600 12px system-ui;box-shadow:0 2px 6px rgba(0,0,0,.35)">${escapeHtml(initials(employee.name))}</div>`,
           iconSize: [34, 34],
           iconAnchor: [17, 17],
         }),
@@ -218,14 +350,14 @@ export function TrackingMap() {
           setSelected(employee);
           setDate(todayIst());
         })
-        .addTo(layer.current);
-    }
+        .addTo(group);
+    });
 
     if (bounds.length > 0 && !fittedOnce.current) {
       map.current?.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
       fittedOnce.current = true;
     }
-  }, [employees, ready, selected]);
+  }, [employees, ready, selected, showRoutes]);
 
   // Route view: the day's trail, punches and visits.
   React.useEffect(() => {
@@ -234,12 +366,9 @@ export function TrackingMap() {
     if (!ready || !L || !group || !selected || !trail) return;
     group.clearLayers();
 
-    const line: [number, number][] = trail.points.map((p) => [p.lat, p.lng]);
-    const bounds: [number, number][] = [...line];
-
-    if (line.length > 1) {
-      L.polyline(line, { color: "#0d9488", weight: 4, opacity: 0.85 }).addTo(group);
-    }
+    const route: RoutePoint[] = trail.points.map((p) => ({ lat: p.lat, lng: p.lng, t: Date.parse(p.at) }));
+    const bounds: [number, number][] = route.map((p) => [p.lat, p.lng]);
+    drawRoute(L, group, route, { color: "#0d9488", weight: 5, timeDots: true, arrowCount: 25 });
 
     const dot = (color: string, label: string) =>
       L.divIcon({
@@ -359,10 +488,25 @@ export function TrackingMap() {
                     {trail.attendance.workAgenda}
                   </p>
                 )}
-                {trail.points.length === 0 && (
+                {trail.points.length === 0 ? (
                   <p className="text-muted-foreground rounded-lg border border-dashed p-3 text-sm">
                     No location trail recorded for this day.
                   </p>
+                ) : (
+                  <ul className="text-muted-foreground grid gap-1.5 text-xs">
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-6 rounded-full bg-teal-600" /> Route taken, arrows show direction
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-6 border-t-2 border-dashed border-slate-500" /> No signal (phone was offline)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="flex w-6 justify-center">
+                        <span className="size-2 rounded-full bg-teal-600 ring-2 ring-white" />
+                      </span>
+                      Every 15 min, hover for the time
+                    </li>
+                  </ul>
                 )}
                 {trail.visits.length > 0 && (
                   <ol className="divide-y overflow-y-auto rounded-lg border text-sm">
@@ -407,6 +551,15 @@ export function TrackingMap() {
                   aria-label="Search employees"
                 />
               </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="accent-primary size-4"
+                  checked={showRoutes}
+                  onChange={(e) => setShowRoutes(e.target.checked)}
+                />
+                Show today&apos;s routes on the map
+              </label>
               {updatedAt && (
                 <p className="text-muted-foreground text-xs">
                   Updated {updatedAt.toLocaleTimeString("en-IN")} · refreshes every 30 s
@@ -427,6 +580,7 @@ export function TrackingMap() {
               ) : (
                 filtered.map((employee) => {
                   const state = dutyState(employee);
+                  const routeColor = ROUTE_COLORS[employees.indexOf(employee) % ROUTE_COLORS.length];
                   return (
                     <li key={employee.id}>
                       <button
@@ -443,7 +597,12 @@ export function TrackingMap() {
                       >
                         <span
                           className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                          style={{ background: state.color }}
+                          style={{
+                            background: state.color,
+                            // The ring matches this employee's route colour on the map.
+                            boxShadow:
+                              showRoutes && employee.trail.length > 1 ? `0 0 0 3px ${routeColor}` : undefined,
+                          }}
                         >
                           {initials(employee.name)}
                         </span>

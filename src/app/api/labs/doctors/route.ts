@@ -11,6 +11,7 @@ const WRITABLE = [
   "prefix",
   "name",
   "hospitalName",
+  "hospitalAddress",
   "speciality",
   "qualification",
   "category",
@@ -20,6 +21,9 @@ const WRITABLE = [
   "pincode",
   "clinicAddress",
   "gender",
+  "bankDetails",
+  "location",
+  "documents",
 ] as const;
 
 function escapeRegex(value: string) {
@@ -42,11 +46,30 @@ export async function GET(request: Request) {
   const query: Record<string, unknown> = { isActive: { $ne: false }, $or: scope };
   if (search) {
     const pattern = { $regex: escapeRegex(search), $options: "i" };
-    query.$and = [{ $or: [{ name: pattern }, { hospitalName: pattern }, { city: pattern }] }];
+    // Search by name, hospital, city, or UIN ID
+    query.$and = [{ $or: [{ name: pattern }, { hospitalName: pattern }, { city: pattern }, { uinId: pattern }] }];
   }
 
   const items = await DoctorModel.find(query).select(LIST_FIELDS).sort({ name: 1 }).limit(500).lean();
   return NextResponse.json({ items });
+}
+
+/**
+ * Generate next UIN ID in format MH001, MH002, etc.
+ */
+async function generateUinId(): Promise<string> {
+  const lastDoctor = await DoctorModel.findOne({ uinId: { $regex: /^MH\d+$/ } })
+    .sort({ uinId: -1 })
+    .select("uinId")
+    .lean();
+
+  if (!lastDoctor?.uinId) {
+    return "MH001";
+  }
+
+  const lastNumber = parseInt(lastDoctor.uinId.substring(2), 10);
+  const nextNumber = lastNumber + 1;
+  return `MH${String(nextNumber).padStart(3, "0")}`;
 }
 
 /** A new doctor met in the field. It is assigned to whoever added it. */
@@ -60,20 +83,42 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const doc: Record<string, string> = {};
-  for (const field of WRITABLE) doc[field] = String(body[field] ?? "").trim();
+  const source = body.source || "racer"; // racer or survey
+
+  const doc: Record<string, unknown> = {};
+  for (const field of WRITABLE) {
+    if (field === "bankDetails" || field === "location") {
+      doc[field] = body[field] || {};
+    } else if (field === "documents") {
+      doc[field] = body[field] || [];
+    } else {
+      doc[field] = String(body[field] ?? "").trim();
+    }
+  }
+
   if (!doc.name) {
     return NextResponse.json({ error: "Doctor name is required" }, { status: 400 });
   }
-  if (!["male", "female", "other"].includes(doc.gender)) doc.gender = "";
+  if (!["male", "female", "other"].includes(doc.gender as string)) doc.gender = "";
+
+  // For Racer app: Generate UIN ID and set pending approval status
+  let uinId;
+  let approvalStatus = "";
+  if (source === "racer") {
+    uinId = await generateUinId();
+    approvalStatus = "pending";
+  }
 
   const item = await DoctorModel.create({
     ...doc,
-    prefix: doc.prefix || "Dr",
+    prefix: (doc.prefix as string) || "Dr",
     zone: employee.zone,
     division: employee.division,
     assignedEmployees: [employee.name],
     createdBy: { username: employee.username, name: employee.name },
+    source,
+    uinId,
+    approvalStatus,
   });
 
   return NextResponse.json({ item }, { status: 201 });

@@ -118,7 +118,8 @@ class LocationTracker {
     }
     await _saveQueue();
 
-    if (_queue.length >= 5) unawaited(upload());
+    // Upload in small batches rather than per fix, to spare the battery.
+    if (_queue.length >= 10) unawaited(upload());
   }
 
   /// Send everything queued. Safe to call any time; overlapping calls merge.

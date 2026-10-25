@@ -3,10 +3,10 @@ import "package:flutter/material.dart";
 import "app_theme.dart";
 import "screens/home_shell.dart";
 import "screens/login_screen.dart";
-import "screens/permissions_screen.dart";
 import "services/api_client.dart";
 import "services/location_tracker.dart";
 import "services/session_store.dart";
+import "widgets/permission_prompt.dart";
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ class NbcLabsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "NBC Labs",
+      title: "Racer NBC",
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       navigatorKey: navigatorKey,
@@ -32,10 +32,11 @@ class NbcLabsApp extends StatelessWidget {
   }
 }
 
-enum _Stage { loading, permissions, login, home }
+enum _Stage { loading, login, home }
 
-/// Decides the first screen: permissions on first launch, then sign-in, then
-/// the app. Also owns sign-out, so a revoked login from anywhere lands here.
+/// Decides the first screen: sign-in or the app, with the permission popup on
+/// top on first launch. Also owns sign-out, so a revoked login from anywhere
+/// lands here.
 class _Bootstrap extends StatefulWidget {
   const _Bootstrap();
 
@@ -63,13 +64,16 @@ class _BootstrapState extends State<_Bootstrap> {
     if (session != null) ApiClient.instance.token = session.token;
     setState(() {
       _session = session;
-      _stage = !onboarded ? _Stage.permissions : (session == null ? _Stage.login : _Stage.home);
+      _stage = session == null ? _Stage.login : _Stage.home;
     });
-  }
-
-  Future<void> _onPermissionsDone() async {
-    await SessionStore.instance.setOnboarded();
-    setState(() => _stage = _session == null ? _Stage.login : _Stage.home);
+    if (!onboarded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final context = navigatorKey.currentContext;
+        if (context == null) return;
+        await showPermissionPrompt(context);
+        await SessionStore.instance.setOnboarded();
+      });
+    }
   }
 
   Future<void> _onSignedIn(Session session) async {
@@ -101,8 +105,6 @@ class _BootstrapState extends State<_Bootstrap> {
     switch (_stage) {
       case _Stage.loading:
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
-      case _Stage.permissions:
-        return PermissionsScreen(onDone: _onPermissionsDone);
       case _Stage.login:
         return LoginScreen(onSignedIn: _onSignedIn);
       case _Stage.home:

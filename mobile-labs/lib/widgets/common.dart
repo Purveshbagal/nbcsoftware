@@ -71,18 +71,20 @@ class StatusChip extends StatelessWidget {
       case "resolved":
       case "dispatched":
       case "present":
-        return (const Color(0xFFDDF5EA), const Color(0xFF0B7A55));
+      case "on duty":
+        return (AppTheme.emeraldSoft, AppTheme.emerald);
       case "rejected":
       case "denied":
       case "skipped":
       case "cancelled":
       case "absent":
-        return (const Color(0xFFFBE3E1), AppTheme.danger);
+        return (AppTheme.dangerSoft, AppTheme.danger);
       case "half-day":
       case "in-progress":
-        return (const Color(0xFFFFF0D9), AppTheme.amber);
+      case "pending":
+        return (AppTheme.amberSoft, AppTheme.amber);
       default:
-        return (const Color(0xFFE8E8FB), AppTheme.indigo);
+        return (AppTheme.primarySoft, AppTheme.indigo);
     }
   }
 
@@ -91,9 +93,9 @@ class StatusChip extends StatelessWidget {
     final (bg, fg) = _colors(status);
     final label = status.isEmpty ? "—" : status[0].toUpperCase() + status.substring(1).replaceAll("-", " ");
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(7)),
+      child: Text(label, style: TextStyle(color: fg, fontSize: 10.5, height: 1.2, fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -108,16 +110,19 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 44),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: const Color(0xFFE8E8FB),
-            child: Icon(icon, color: AppTheme.indigo, size: 28),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppTheme.primarySoft,
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Icon(icon, color: AppTheme.indigo, size: 30),
           ),
           const SizedBox(height: 16),
-          Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 14)),
+          Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.muted)),
         ],
       ),
     );
@@ -153,31 +158,40 @@ class LoadViewState<T> extends State<LoadView<T>> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 26, height: 26, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                SizedBox(height: 14),
+                Text("Loading your workspace", style: TextStyle(fontSize: 11.5, color: AppTheme.muted)),
+              ],
+            ),
+          );
         }
         if (snapshot.hasError) {
           final error = snapshot.error;
           return RefreshIndicator(
             onRefresh: reload,
             child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                const SizedBox(height: 80),
-                const Icon(Icons.cloud_off_rounded, size: 48, color: AppTheme.muted),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(
-                    error is ApiException ? error.message : "Could not load. Pull down to try again.",
-                    textAlign: TextAlign.center,
-                  ),
+                EmptyState(
+                  icon: Icons.cloud_off_rounded,
+                  message: error is ApiException ? error.message : "Could not load your workspace. Please try again.",
                 ),
-                const SizedBox(height: 16),
-                Center(child: OutlinedButton(onPressed: reload, child: const Text("Try again"))),
+                Center(child: OutlinedButton.icon(onPressed: reload, icon: const Icon(Icons.refresh_rounded), label: const Text("Try again"))),
               ],
             ),
           );
         }
-        return RefreshIndicator(onRefresh: reload, child: widget.builder(context, snapshot.data as T));
+        return RefreshIndicator(
+          onRefresh: reload,
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(physics: const AlwaysScrollableScrollPhysics()),
+            child: widget.builder(context, snapshot.data as T),
+          ),
+        );
       },
     );
   }
@@ -199,7 +213,7 @@ class RecordTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Card(
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -214,16 +228,23 @@ class RecordTile extends StatelessWidget {
                     Text(title, style: textTheme.titleMedium),
                     if (subtitle != null && subtitle!.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(subtitle!, style: textTheme.bodyMedium),
+                      Text(subtitle!, style: textTheme.bodyMedium?.copyWith(color: AppTheme.muted)),
                     ],
                     if (meta != null && meta!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(meta!, style: textTheme.bodySmall),
+                    ],
+                    if (status != null) ...[
+                      const SizedBox(height: 10),
+                      StatusChip(status!),
                     ],
                   ],
                 ),
               ),
-              if (status != null) ...[const SizedBox(width: 8), StatusChip(status!)],
+              if (onTap != null) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.chevron_right_rounded, size: 18, color: AppTheme.muted),
+              ],
             ],
           ),
         ),
@@ -239,10 +260,10 @@ class SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+      padding: const EdgeInsets.fromLTRB(2, 22, 2, 10),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: AppTheme.muted),
+        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppTheme.muted),
       ),
     );
   }

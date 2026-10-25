@@ -196,7 +196,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       onPressed: () => setState(() => line.quantity > 1 ? line.quantity-- : _lines.remove(line)),
                       icon: Icon(line.quantity > 1 ? Icons.remove_circle_outline_rounded : Icons.delete_outline_rounded),
                     ),
-                    Text("${line.quantity}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text("${line.quantity}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                     IconButton(onPressed: () => setState(() => line.quantity++), icon: const Icon(Icons.add_circle_outline_rounded)),
                   ],
                 ),
@@ -210,7 +210,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
             children: [
               Text("Total", style: Theme.of(context).textTheme.titleMedium),
               const Spacer(),
-              Text(fmtRupees(_total), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+              Text(fmtRupees(_total), style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 16),

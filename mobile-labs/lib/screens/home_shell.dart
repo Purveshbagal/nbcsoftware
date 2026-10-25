@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import "../app_theme.dart";
 import "../services/location_tracker.dart";
 import "../services/session_store.dart";
 import "attendance_screen.dart";
@@ -40,7 +41,10 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeScreen(session: widget.session, onOpenTab: (i) => setState(() => _index = i)),
+      HomeScreen(
+        session: widget.session,
+        onOpenTab: (i) => setState(() => _index = i),
+      ),
       const VisitsScreen(),
       const AttendanceScreen(),
       MoreScreen(session: widget.session, onSignOut: widget.onSignOut),
@@ -48,19 +52,40 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
 
     return Scaffold(
       body: IndexedStack(index: _index, children: pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: "Home"),
-          NavigationDestination(icon: Icon(Icons.place_outlined), selectedIcon: Icon(Icons.place_rounded), label: "Visits"),
-          NavigationDestination(
-            icon: Icon(Icons.event_available_outlined),
-            selectedIcon: Icon(Icons.event_available_rounded),
-            label: "Attendance",
-          ),
-          NavigationDestination(icon: Icon(Icons.grid_view_outlined), selectedIcon: Icon(Icons.grid_view_rounded), label: "More"),
-        ],
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: AppTheme.border)),
+        ),
+        child: NavigationBar(
+          height: 64,
+          animationDuration: const Duration(milliseconds: 220),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          selectedIndex: _index,
+          onDestinationSelected: (i) => setState(() => _index = i),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: "Home",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.place_outlined),
+              selectedIcon: Icon(Icons.place_rounded),
+              label: "Visits",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.event_available_outlined),
+              selectedIcon: Icon(Icons.event_available_rounded),
+              label: "Attendance",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.widgets_outlined),
+              selectedIcon: Icon(Icons.widgets_rounded),
+              label: "More",
+            ),
+          ],
+        ),
       ),
     );
   }

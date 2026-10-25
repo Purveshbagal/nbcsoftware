@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "../app_theme.dart";
 import "../services/api_client.dart";
 import "../services/session_store.dart";
+import "payment_ledger_screen.dart";
 
 class DashboardScreen extends StatefulWidget {
   final ApiClient apiClient;
@@ -23,12 +24,20 @@ class _DashboardStats {
   final int pendingApprovals;
   final int approvedRegistrations;
   final int pendingPayments;
+  final num spentAmount;
+  final int spentCount;
+  final num owedAmount;
+  final int owedCount;
 
   const _DashboardStats({
     required this.totalRegistrations,
     required this.pendingApprovals,
     required this.approvedRegistrations,
     required this.pendingPayments,
+    required this.spentAmount,
+    required this.spentCount,
+    required this.owedAmount,
+    required this.owedCount,
   });
 }
 
@@ -44,6 +53,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<_DashboardStats> _load() async {
     final registrations = await widget.apiClient.fetchRegistrations();
     final payments = await widget.apiClient.fetchPayments();
+    final spent = payments.where((p) => p.handedOverToDoctor);
+    final owed = payments.where((p) => p.owedToDoctor);
 
     return _DashboardStats(
       totalRegistrations: registrations.length,
@@ -54,6 +65,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           .where((r) => r.status == "approved")
           .length,
       pendingPayments: payments.where((p) => p.status == "pending").length,
+      spentAmount: spent.fold<num>(0, (sum, p) => sum + p.payableAmount),
+      spentCount: spent.length,
+      owedAmount: owed.fold<num>(0, (sum, p) => sum + p.payableAmount),
+      owedCount: owed.length,
     );
   }
 
@@ -67,6 +82,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (_) {
       // The FutureBuilder renders the failure and retry action.
     }
+  }
+
+  Future<void> _openLedger(LedgerKind kind) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            PaymentLedgerScreen(apiClient: widget.apiClient, kind: kind),
+      ),
+    );
+    if (mounted) _refresh();
   }
 
   @override
@@ -163,45 +188,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
               }
 
               final stats = snapshot.data!;
-              return LayoutBuilder(
-                builder: (context, constraints) => GridView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount:
-                        constraints.maxWidth < 340 ||
-                            MediaQuery.textScalerOf(context).scale(14) > 20
-                        ? 1
-                        : 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    mainAxisExtent:
-                        180 +
-                        (MediaQuery.textScalerOf(context).scale(14) - 14) * 4,
-                  ),
-                  children: [
-                    _StatCard(
-                      label: "My Registrations",
-                      value: stats.totalRegistrations,
-                      icon: Icons.person_add_alt,
-                    ),
-                    _StatCard(
-                      label: "Pending Approvals",
-                      value: stats.pendingApprovals,
-                      icon: Icons.hourglass_top,
-                    ),
-                    _StatCard(
-                      label: "Approved",
-                      value: stats.approvedRegistrations,
-                      icon: Icons.verified,
-                    ),
-                    _StatCard(
-                      label: "Pending Payments",
-                      value: stats.pendingPayments,
-                      icon: Icons.request_page,
-                    ),
-                  ],
+              final narrow = MediaQuery.textScalerOf(context).scale(14) > 20;
+              final paymentCards = [
+                _MoneyCard(
+                  label: "Total Spend",
+                  amount: stats.spentAmount,
+                  detail: "${stats.spentCount} given to doctors",
+                  icon: Icons.payments_outlined,
+                  color: AppTheme.teal,
+                  onTap: () => _openLedger(LedgerKind.paid),
                 ),
+                _MoneyCard(
+                  label: "Pending Payments",
+                  amount: stats.owedAmount,
+                  detail: "${stats.owedCount} still to give",
+                  icon: Icons.hourglass_top,
+                  color: const Color(0xFF97600C),
+                  onTap: () => _openLedger(LedgerKind.pending),
+                ),
+              ];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) =>
+                        constraints.maxWidth < 340 || narrow
+                        ? Column(
+                            children: [
+                              paymentCards[0],
+                              const SizedBox(height: 12),
+                              paymentCards[1],
+                            ],
+                          )
+                        : IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(child: paymentCards[0]),
+                                const SizedBox(width: 12),
+                                Expanded(child: paymentCards[1]),
+                              ],
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) => GridView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount:
+                            constraints.maxWidth < 340 ||
+                                MediaQuery.textScalerOf(context).scale(14) > 20
+                            ? 1
+                            : 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        mainAxisExtent:
+                            180 +
+                            (MediaQuery.textScalerOf(context).scale(14) - 14) *
+                                4,
+                      ),
+                      children: [
+                        _StatCard(
+                          label: "My Registrations",
+                          value: stats.totalRegistrations,
+                          icon: Icons.person_add_alt,
+                        ),
+                        _StatCard(
+                          label: "Pending Approvals",
+                          value: stats.pendingApprovals,
+                          icon: Icons.hourglass_top,
+                        ),
+                        _StatCard(
+                          label: "Approved",
+                          value: stats.approvedRegistrations,
+                          icon: Icons.verified,
+                        ),
+                        _StatCard(
+                          label: "Requests in Review",
+                          value: stats.pendingPayments,
+                          icon: Icons.request_page,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -248,6 +320,73 @@ class _StatCard extends StatelessWidget {
             Text("$value", style: Theme.of(context).textTheme.headlineMedium),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A rupee total that opens its payment history when tapped.
+class _MoneyCard extends StatelessWidget {
+  final String label;
+  final num amount;
+  final String detail;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MoneyCard({
+    required this.label,
+    required this.amount,
+    required this.detail,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, size: 20, color: color),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: theme.colorScheme.outline,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                formatRupees(amount),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(label, style: theme.textTheme.titleSmall),
+              const SizedBox(height: 2),
+              Text(detail, style: theme.textTheme.bodySmall),
+            ],
+          ),
         ),
       ),
     );

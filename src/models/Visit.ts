@@ -18,14 +18,46 @@ const visitSchema = new Schema(
     employeeName: { type: String, trim: true },
 
     visitDate: { type: String, trim: true },
+    plannedDate: { type: String, trim: true }, // Date when visit is planned
+    modeOfTransport: { type: String, enum: ["Bike", "Car", "Public Transport", ""], default: "" },
     callObjective: { type: String, trim: true },
     postCallInfo: { type: String, trim: true },
     remarks: { type: String, trim: true },
-    products: { type: [String], default: [] },
-    samples: { type: [String], default: [] },
+    extraInfo: { type: String, trim: true },
+
+    // Products promoted during visit
+    productsPromoted: [
+      {
+        productId: { type: String },
+        productName: { type: String },
+        isPrescribing: { type: Boolean, default: false },
+        isTop5: { type: Boolean, default: false },
+      },
+    ],
+
+    // Samples given during visit
+    samplesGiven: [
+      {
+        productId: { type: String },
+        productName: { type: String },
+        quantity: { type: Number, default: 0 },
+      },
+    ],
+
+    products: { type: [String], default: [] }, // Legacy field
+    samples: { type: [String], default: [] }, // Legacy field
     gifts: { type: [String], default: [] },
     pobValue: { type: Number },
     skippedReason: { type: String, trim: true },
+    metDoctor: { type: Boolean }, // Did the user meet the doctor?
+    notMetReason: { type: String, trim: true }, // Reason if didn't meet
+
+    // Visit photos
+    photos: { type: [String], default: [] }, // Base64 or URLs
+
+    // Presentation shown
+    presentationShown: { type: Boolean, default: false },
+    presentationId: { type: String, trim: true },
 
     // Set when the visit is logged from the NBC Labs mobile app.
     employeeId: { type: Schema.Types.ObjectId, ref: "Employee" },

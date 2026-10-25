@@ -36,7 +36,7 @@ class MediaScreen extends StatelessWidget {
               final url = str(m["url"]);
               return RecordTile(
                 leading: CircleAvatar(
-                  backgroundColor: const Color(0xFFE8E8FB),
+                  backgroundColor: AppTheme.primarySoft,
                   child: Icon(_icon(str(m["fileType"]).isEmpty ? url : str(m["fileType"])), color: AppTheme.indigo),
                 ),
                 title: str(m["title"]),
