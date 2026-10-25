@@ -5,7 +5,7 @@ import { readJsonBody } from "@/lib/read-json";
 import DoctorModel from "@/models/Doctor";
 
 const LIST_FIELDS =
-  "doctorCode prefix name hospitalName speciality qualification category contactNo city clinicAddress zone assignedEmployees";
+  "doctorCode prefix name hospitalName speciality qualification category contactNo city clinicAddress zone assignedEmployees approvalStatus";
 
 const WRITABLE = [
   "prefix",

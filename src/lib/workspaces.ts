@@ -152,7 +152,6 @@ const teamGroups: NavGroup[] = [
     label: "Administration",
     items: [
       { title: "Users", url: "/users", icon: Users },
-      { title: "Doctor Approvals", url: "/doctor-approvals", icon: UserSearch },
       { title: "Presentations", url: "/presentations", icon: MonitorPlay },
     ],
   },
@@ -293,6 +292,10 @@ const fieldForceGroups: NavGroup[] = [
       },
     ],
   },
+  {
+    label: "Administration",
+    items: [{ title: "Doctor Approvals", url: "/sfa/doctor-approvals", icon: UserSearch }],
+  },
 ];
 
 export const WORKSPACES: Workspace[] = [
@@ -303,7 +306,7 @@ export const WORKSPACES: Workspace[] = [
     badge: "Administration workspace",
     icon: GraduationCap,
     home: "/dashboard",
-    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics", "/doctor-approvals", "/presentations"],
+    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics", "/presentations"],
     groups: teamGroups,
   },
   {

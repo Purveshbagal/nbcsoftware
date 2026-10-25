@@ -89,9 +89,7 @@ class ApiClient {
       headers: _headers,
     );
     final data = _decode(res);
-    return (data["data"] as List<dynamic>)
-        .map((e) => e as Map<String, dynamic>)
-        .toList();
+    return _masterRows(data["data"] ?? data["qualifications"]);
   }
 
   Future<List<Map<String, dynamic>>> fetchSpecialities() async {
@@ -100,10 +98,19 @@ class ApiClient {
       headers: _headers,
     );
     final data = _decode(res);
-    return (data["data"] as List<dynamic>)
-        .map((e) => e as Map<String, dynamic>)
-        .toList();
+    return _masterRows(data["data"] ?? data["specialities"]);
   }
+
+  /// Supports both deployed master-data formats: `{ name: "MBBS" }` rows
+  /// and the lighter `"MBBS"` string list used by the Labs API.
+  List<Map<String, dynamic>> _masterRows(Object? value) => (value as List? ?? const [])
+      .map((item) => item is Map<String, dynamic>
+          ? item
+          : item is Map
+              ? Map<String, dynamic>.from(item)
+              : {"name": item.toString()})
+      .where((item) => (item["name"]?.toString().trim().isNotEmpty ?? false))
+      .toList();
 
   Future<List<Map<String, dynamic>>> fetchDoctors({String? status}) async {
     var url = "$apiBaseUrl/doctors";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, X, Eye, MapPin, Phone, Mail, Building2 } from "lucide-react";
+import { Check, X, Eye, MapPin, Phone, Building2 } from "lucide-react";
 
 type Doctor = {
   _id: string;
@@ -31,6 +31,8 @@ type Doctor = {
     name: string;
   };
   createdAt: string;
+  approvalStatus: "pending" | "approved" | "rejected";
+  approvedAt?: string;
 };
 
 export default function DoctorApprovalsPage() {
@@ -38,23 +40,26 @@ export default function DoctorApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [status, setStatus] = useState<Doctor["approvalStatus"]>("pending");
 
   useEffect(() => {
-    loadDoctors();
-  }, []);
-
-  async function loadDoctors() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/sfa/doctors/approve?status=pending");
-      const data = await res.json();
-      setDoctors(data.doctors || []);
-    } catch (error) {
-      console.error("Failed to load doctors:", error);
-    } finally {
-      setLoading(false);
+    let active = true;
+    async function loadDoctors() {
+      try {
+        const res = await fetch(`/api/sfa/doctors/approve?status=${status}`);
+        const data = await res.json();
+        if (active) setDoctors(data.doctors || []);
+      } catch {
+        if (active) setDoctors([]);
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-  }
+    void loadDoctors();
+    return () => {
+      active = false;
+    };
+  }, [status]);
 
   async function handleAction(doctorId: string, action: "approve" | "reject") {
     setProcessing(doctorId);
@@ -66,14 +71,15 @@ export default function DoctorApprovalsPage() {
       });
 
       if (res.ok) {
-        // Remove from list
+        // Keep the decision in the database for history; only remove it from
+        // the current Pending view.
         setDoctors(doctors.filter((d) => d._id !== doctorId));
         setSelectedDoctor(null);
       } else {
         const error = await res.json();
         alert(error.error || "Failed to process request");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to process request");
     } finally {
       setProcessing(null);
@@ -95,7 +101,24 @@ export default function DoctorApprovalsPage() {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Doctor Approvals</h1>
-        <p className="text-gray-600">Review and approve doctors added from Racer app</p>
+        <p className="text-gray-600">Review doctors added from Racer NBC and retain every approval decision as history.</p>
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {(["pending", "approved", "rejected"] as const).map((value) => (
+          <button
+            key={value}
+            onClick={() => {
+              setStatus(value);
+              setSelectedDoctor(null);
+            }}
+            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition ${
+              status === value ? "bg-slate-900 text-white" : "bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            {value === "pending" ? "Pending approvals" : `${value} history`}
+          </button>
+        ))}
       </div>
 
       {doctors.length === 0 ? (
@@ -103,8 +126,8 @@ export default function DoctorApprovalsPage() {
           <div className="text-gray-400 mb-4">
             <Check className="w-16 h-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">All Caught Up!</h3>
-          <p className="text-gray-600">No pending doctor approvals at the moment.</p>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">No {status} doctors</h3>
+          <p className="text-gray-600">There are no doctors in this approval view.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -123,8 +146,14 @@ export default function DoctorApprovalsPage() {
                     <h3 className="text-lg font-bold text-gray-900">{doctor.name}</h3>
                     <p className="text-sm text-blue-600 font-medium">UIN: {doctor.uinId}</p>
                   </div>
-                  <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    Pending
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    doctor.approvalStatus === "approved"
+                      ? "bg-green-100 text-green-800"
+                      : doctor.approvalStatus === "rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                  }`}>
+                    {doctor.approvalStatus}
                   </span>
                 </div>
 
@@ -140,9 +169,12 @@ export default function DoctorApprovalsPage() {
                   <p className="text-xs text-gray-500">
                     Added by {doctor.createdBy.name} on {new Date(doctor.createdAt).toLocaleDateString()}
                   </p>
+                  {doctor.approvedAt && (
+                    <p className="text-xs text-gray-500">Decision made on {new Date(doctor.approvedAt).toLocaleDateString()}</p>
+                  )}
                 </div>
 
-                <div className="flex gap-2">
+                {doctor.approvalStatus === "pending" && <div className="flex gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -165,7 +197,7 @@ export default function DoctorApprovalsPage() {
                     <X className="w-4 h-4" />
                     Reject
                   </button>
-                </div>
+                </div>}
               </div>
             ))}
           </div>
