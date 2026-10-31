@@ -34,7 +34,12 @@ export default async function EmployeesPage() {
   const rows = toPlainRows(docs);
 
   const fields: Field[] = [
-    { key: "code", label: "Employee Code", section: "Basic information" },
+    {
+      key: "code",
+      label: "Employee Code",
+      section: "Basic information",
+      placeholder: "Auto-generated (e.g., EMP001, EMP002)"
+    },
     { key: "name", label: "Name", required: true, section: "Basic information" },
     { key: "email", label: "Email", type: "email", section: "Basic information" },
     { key: "contactNo", label: "Contact", type: "tel", section: "Basic information" },
@@ -45,14 +50,14 @@ export default async function EmployeesPage() {
       key: "designation",
       label: "Designation",
       type: "select",
-      options: masters.designation,
+      options: ["DSO", "FSO", "SFSO", "DSM", "RSM", "ZSM", "NSM", ...(masters.designation || [])],
       section: "Work information",
     },
     {
       key: "division",
       label: "Division/Department",
       type: "select",
-      options: masters.division,
+      options: ["PEDIA", "DERMA", ...(masters.division || [])],
       section: "Work information",
     },
     { key: "zone", label: "Zone", type: "select", options: masters.zone, section: "Work information" },
@@ -95,9 +100,9 @@ export default async function EmployeesPage() {
         columns={columns}
         fields={fields}
         filters={[
-          { key: "division", label: "Division", options: masters.division },
+          { key: "division", label: "Division", options: ["PEDIA", "DERMA", ...(masters.division || [])] },
           { key: "zone", label: "Zone", options: masters.zone },
-          { key: "designation", label: "Designation", options: masters.designation },
+          { key: "designation", label: "Designation", options: ["DSO", "FSO", "SFSO", "DSM", "RSM", "ZSM", "NSM", ...(masters.designation || [])] },
         ]}
       />
     </div>

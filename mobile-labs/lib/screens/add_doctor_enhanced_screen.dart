@@ -1,6 +1,7 @@
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:file_picker/file_picker.dart";
+import "package:image_picker/image_picker.dart";
 import "package:geolocator/geolocator.dart";
 
 import "../app_theme.dart";
@@ -9,10 +10,11 @@ import "../widgets/common.dart";
 import "location_picker_enhanced_screen.dart";
 
 /// Enhanced Add Doctor screen with all new fields:
+/// - Registration Number
 /// - Hospital Address
 /// - Email
 /// - Bank Details (4 fields)
-/// - Document Upload (PDF/Images)
+/// - Document Upload (PDF/Images/Camera)
 /// - Location Picker (with map)
 /// - UIN ID auto-generation on backend
 /// - Pending approval status
@@ -127,25 +129,72 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
   }
 
   Future<void> _pickDocument() async {
+    // Show dialog to choose between Camera or Storage
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Upload Document"),
+        content: const Text("Choose upload source:"),
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.pop(context, "camera"),
+            icon: const Icon(Icons.camera_alt),
+            label: const Text("Camera"),
+          ),
+          TextButton.icon(
+            onPressed: () => Navigator.pop(context, "storage"),
+            icon: const Icon(Icons.folder),
+            label: const Text("Storage"),
+          ),
+        ],
+      ),
+    );
+
+    if (choice == null) return;
+
     try {
-      final files = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
+      if (choice == "camera") {
+        // Use camera to capture image
+        final picker = ImagePicker();
+        final image = await picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1920,
+          maxHeight: 1920,
+          imageQuality: 85,
+        );
 
-      if (files != null && files.isNotEmpty) {
-        final file = files.first;
-        final bytes = await file.readAsBytes();
-
-        if (bytes != null) {
+        if (image != null) {
+          final bytes = await image.readAsBytes();
           final base64String = base64Encode(bytes);
           setState(() {
             _documents.add({
-              'name': file.name,
+              'name': image.name,
               'data': base64String,
-              'type': file.extension,
+              'type': image.path.split('.').last,
             });
           });
+        }
+      } else {
+        // Use file picker for storage
+        final files = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+        );
+
+        if (files != null && files.isNotEmpty) {
+          final file = files.first;
+          final bytes = await file.readAsBytes();
+
+          if (bytes != null) {
+            final base64String = base64Encode(bytes);
+            setState(() {
+              _documents.add({
+                'name': file.name,
+                'data': base64String,
+                'type': file.extension,
+              });
+            });
+          }
         }
       }
     } catch (e) {
@@ -236,6 +285,7 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
             // Basic Info
             _text("name", "Doctor Name", required: true),
             _text("contactNo", "Mobile Number", required: true, keyboard: TextInputType.phone),
+            _text("registrationNumber", "Registration Number"),
             _pick("qualification", "Qualification", "qualification"),
             _pick("speciality", "Speciality", "doctor-speciality"),
             _pick("category", "Category", "doctor-category", fallback: const ["Important", "Super Important", "A"]),

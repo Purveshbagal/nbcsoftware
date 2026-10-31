@@ -152,7 +152,6 @@ const teamGroups: NavGroup[] = [
     label: "Administration",
     items: [
       { title: "Users", url: "/users", icon: Users },
-      { title: "Presentations", url: "/presentations", icon: MonitorPlay },
     ],
   },
 ];
@@ -306,7 +305,7 @@ export const WORKSPACES: Workspace[] = [
     badge: "Administration workspace",
     icon: GraduationCap,
     home: "/dashboard",
-    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics", "/presentations"],
+    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics"],
     groups: teamGroups,
   },
   {
