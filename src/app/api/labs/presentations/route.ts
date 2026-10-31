@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 import { requireEmployee } from "@/lib/labs-auth";
 import { connectToDatabase } from "@/lib/mongodb";
-import MediaAssetModel from "@/models/MediaAsset";
+import PresentationModel from "@/models/Presentation";
 
 /**
  * Get active presentations for mobile app
- * Uses MediaAsset model with kind="presentation" (same as Racer NBC)
+ * Uses new Presentation model matching screenshot structure
  */
 export async function GET(request: Request) {
   const auth = await requireEmployee(request);
@@ -14,15 +14,22 @@ export async function GET(request: Request) {
     return auth.error;
   }
 
+  const { employee } = auth;
+
   await connectToDatabase();
 
-  // Fetch presentations from MediaAsset collection (kind="presentation")
-  const presentations = await MediaAssetModel.find({
-    kind: "presentation",
-    isActive: true
+  // Fetch presentations assigned to this employee or their division
+  const presentations = await PresentationModel.find({
+    isActive: true,
+    $or: [
+      { assignedTo: employee.name },
+      { assignedToId: employee._id?.toString() },
+      { division: employee.division },
+      { assigningType: "Employee" }, // All employee presentations
+    ]
   })
-    .sort({ createdAt: -1 })
-    .select("title description url fileType division campaign")
+    .sort({ date: -1, createdAt: -1 })
+    .select("title description assigningType assignedTo division date coverImage slides")
     .limit(50)
     .lean();
 
@@ -31,10 +38,13 @@ export async function GET(request: Request) {
     _id: p._id,
     title: p.title,
     description: p.description,
-    fileUrl: p.url,
-    fileType: p.fileType,
+    assigningType: p.assigningType,
+    assignedTo: p.assignedTo,
     division: p.division,
-    campaign: p.campaign,
+    date: p.date,
+    coverImage: p.coverImage,
+    slides: p.slides || [],
+    slidesCount: p.slides?.length || 0,
   }));
 
   return NextResponse.json({ presentations: transformedPresentations });

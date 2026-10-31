@@ -246,11 +246,11 @@ const fieldForceGroups: NavGroup[] = [
           { title: "Leave Report", url: "/sfa/hr/leave-report" },
         ],
       },
+      { title: "Presentation", url: "/presentations", icon: MonitorPlay },
       {
         title: "E-detailing",
         icon: MonitorPlay,
         items: [
-          { title: "Presentation", url: "/sfa/e-detailing/presentation" },
           { title: "Media Gallery", url: "/sfa/e-detailing/media" },
         ],
       },
@@ -315,7 +315,7 @@ export const WORKSPACES: Workspace[] = [
     badge: "Field force workspace",
     icon: MapPin,
     home: "/sfa",
-    prefixes: ["/sfa"],
+    prefixes: ["/sfa", "/presentations"],
     groups: fieldForceGroups,
   },
 ];

@@ -24,6 +24,9 @@ const attendanceSchema = new Schema(
     date: { type: String, required: true, trim: true },
 
     workAgenda: { type: String, trim: true },
+    workLocation: { type: String, trim: true }, // Head quarter / specific location / Other
+    route: { type: String, trim: true }, // Ex-station/out-station route
+    travelMode: { type: String, trim: true }, // Travel mode selection
     punchIn: { type: punchSchema },
     punchOut: { type: punchSchema },
     /** Filled on punch-out. */
