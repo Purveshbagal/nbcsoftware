@@ -101,6 +101,50 @@ export async function GET(
 }
 
 /**
+ * PATCH - Update slide order
+ */
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await params in Next.js 15
+  const { id } = await params;
+
+  const session = await getSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = (await readJsonBody(request)) as
+    | {
+        slides?: Slide[];
+      }
+    | null;
+
+  if (!body?.slides) {
+    return NextResponse.json({ error: "No slides provided" }, { status: 400 });
+  }
+
+  await connectToDatabase();
+
+  const presentation = await PresentationModel.findById(id);
+
+  if (!presentation) {
+    return NextResponse.json({ error: "Presentation not found" }, { status: 404 });
+  }
+
+  // Update slides with new order
+  presentation.slides = body.slides;
+  presentation.updatedBy = { username: session.username, name: session.name };
+  await presentation.save();
+
+  return NextResponse.json({
+    slides: presentation.slides,
+    message: "Slide order updated successfully"
+  });
+}
+
+/**
  * DELETE - Remove a slide from presentation
  */
 export async function DELETE(

@@ -28,6 +28,7 @@ export default async function PresentationSlidesPage({ params }: Props) {
     imageData: slide.imageData || "",
     order: slide.order || 0,
     uploadedAt: slide.uploadedAt ? slide.uploadedAt.toISOString() : new Date().toISOString(),
+    _id: slide._id ? slide._id.toString() : "",
   }));
 
   return (

@@ -18,14 +18,20 @@ export default async function PresentationPage() {
   // Convert MongoDB documents to plain objects
   const plainPresentations = presentations.map((p) => ({
     _id: p._id.toString(),
-    title: p.title,
-    assigningType: p.assigningType,
-    assignedTo: p.assignedTo,
-    division: p.division,
-    date: p.date,
-    description: p.description,
-    coverImage: p.coverImage,
-    slides: p.slides,
+    title: p.title || "",
+    assigningType: p.assigningType || "",
+    assignedTo: p.assignedTo || "",
+    division: p.division || "",
+    date: p.date ? p.date.toISOString() : "",
+    description: p.description || "",
+    coverImage: p.coverImage || "",
+    slides: (p.slides || []).map((slide: any) => ({
+      imageUrl: slide.imageUrl || "",
+      imageData: slide.imageData || "",
+      order: slide.order || 0,
+      uploadedAt: slide.uploadedAt ? slide.uploadedAt.toISOString() : "",
+      _id: slide._id ? slide._id.toString() : "",
+    })),
   }));
 
   return (
