@@ -39,23 +39,26 @@ export async function POST(request: Request) {
     | {
         title?: string;
         description?: string;
+        assigningType?: string;
+        assignedTo?: string;
+        assignedToId?: string;
+        division?: string;
+        date?: string;
+        coverImage?: string;
+        slides?: Array<{ imageUrl?: string; imageData?: string; order?: number }>;
+        // Legacy fields
         fileUrl?: string;
         fileType?: string;
         fileName?: string;
         fileSize?: number;
         category?: string;
         products?: string[];
-        division?: string;
         isActive?: boolean;
       }
     | null;
 
   if (!body?.title) {
-    return NextResponse.json({ error: "Title is required" }, { status: 400 });
-  }
-
-  if (!body?.fileUrl) {
-    return NextResponse.json({ error: "File URL is required" }, { status: 400 });
+    return NextResponse.json({ error: "Presentation Name is required" }, { status: 400 });
   }
 
   await connectToDatabase();
@@ -63,13 +66,20 @@ export async function POST(request: Request) {
   const presentation = await PresentationModel.create({
     title: body.title,
     description: body.description || "",
-    fileUrl: body.fileUrl,
-    fileType: body.fileType || "pdf",
+    assigningType: body.assigningType || "Employee",
+    assignedTo: body.assignedTo || "",
+    assignedToId: body.assignedToId || "",
+    division: body.division || "",
+    date: body.date ? new Date(body.date) : new Date(),
+    coverImage: body.coverImage || "",
+    slides: body.slides || [],
+    // Legacy fields
+    fileUrl: body.fileUrl || "",
+    fileType: body.fileType || "",
     fileName: body.fileName || "",
     fileSize: body.fileSize || 0,
     category: body.category || "",
     products: body.products || [],
-    division: body.division || "",
     isActive: body.isActive !== false,
     publishedAt: body.isActive !== false ? new Date() : undefined,
     createdBy: { username: session.username, name: session.name },
@@ -121,13 +131,20 @@ export async function PUT(request: Request) {
         id?: string;
         title?: string;
         description?: string;
+        assigningType?: string;
+        assignedTo?: string;
+        assignedToId?: string;
+        division?: string;
+        date?: string;
+        coverImage?: string;
+        slides?: Array<{ imageUrl?: string; imageData?: string; order?: number }>;
+        // Legacy fields
         fileUrl?: string;
         fileType?: string;
         fileName?: string;
         fileSize?: number;
         category?: string;
         products?: string[];
-        division?: string;
         isActive?: boolean;
       }
     | null;
@@ -144,16 +161,24 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Presentation not found" }, { status: 404 });
   }
 
-  // Update fields
+  // Update fields (screenshot fields)
   if (body.title !== undefined) presentation.title = body.title;
   if (body.description !== undefined) presentation.description = body.description;
+  if (body.assigningType !== undefined) presentation.assigningType = body.assigningType;
+  if (body.assignedTo !== undefined) presentation.assignedTo = body.assignedTo;
+  if (body.assignedToId !== undefined) presentation.assignedToId = body.assignedToId;
+  if (body.division !== undefined) presentation.division = body.division;
+  if (body.date !== undefined) presentation.date = new Date(body.date);
+  if (body.coverImage !== undefined) presentation.coverImage = body.coverImage;
+  if (body.slides !== undefined) presentation.slides = body.slides;
+
+  // Legacy fields
   if (body.fileUrl !== undefined) presentation.fileUrl = body.fileUrl;
   if (body.fileType !== undefined) presentation.fileType = body.fileType;
   if (body.fileName !== undefined) presentation.fileName = body.fileName;
   if (body.fileSize !== undefined) presentation.fileSize = body.fileSize;
   if (body.category !== undefined) presentation.category = body.category;
   if (body.products !== undefined) presentation.products = body.products;
-  if (body.division !== undefined) presentation.division = body.division;
   if (body.isActive !== undefined) {
     presentation.isActive = body.isActive;
     if (body.isActive && !presentation.publishedAt) {

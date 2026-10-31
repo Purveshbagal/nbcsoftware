@@ -6,7 +6,7 @@ import DoctorModel from "@/models/Doctor";
 import { generateDoctorUinId } from "@/utils/doctorUinGenerator";
 
 const LIST_FIELDS =
-  "doctorCode uinId prefix name hospitalName hospitalAddress speciality qualification category contactNo email city pincode clinicAddress gender location bankDetails zone assignedEmployees approvalStatus";
+  "doctorCode uinId prefix name hospitalName hospitalAddress speciality qualification registrationNumber category contactNo email city pincode clinicAddress gender location bankDetails zone assignedEmployees approvalStatus";
 
 const WRITABLE = [
   "prefix",
@@ -15,6 +15,7 @@ const WRITABLE = [
   "hospitalAddress",
   "speciality",
   "qualification",
+  "registrationNumber",
   "category",
   "contactNo",
   "email",

@@ -152,7 +152,6 @@ const teamGroups: NavGroup[] = [
     label: "Administration",
     items: [
       { title: "Users", url: "/users", icon: Users },
-      { title: "Presentations", url: "/presentations", icon: MonitorPlay },
     ],
   },
 ];
@@ -247,11 +246,11 @@ const fieldForceGroups: NavGroup[] = [
           { title: "Leave Report", url: "/sfa/hr/leave-report" },
         ],
       },
+      { title: "Presentation", url: "/presentations", icon: MonitorPlay },
       {
         title: "E-detailing",
         icon: MonitorPlay,
         items: [
-          { title: "Presentation", url: "/sfa/e-detailing/presentation" },
           { title: "Media Gallery", url: "/sfa/e-detailing/media" },
         ],
       },
@@ -306,7 +305,7 @@ export const WORKSPACES: Workspace[] = [
     badge: "Administration workspace",
     icon: GraduationCap,
     home: "/dashboard",
-    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics", "/presentations"],
+    prefixes: ["/dashboard", "/register", "/payment", "/survey-reports", "/users", "/budget-analytics"],
     groups: teamGroups,
   },
   {
@@ -316,7 +315,7 @@ export const WORKSPACES: Workspace[] = [
     badge: "Field force workspace",
     icon: MapPin,
     home: "/sfa",
-    prefixes: ["/sfa"],
+    prefixes: ["/sfa", "/presentations"],
     groups: fieldForceGroups,
   },
 ];

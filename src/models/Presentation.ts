@@ -2,19 +2,37 @@ import mongoose, { Schema, type InferSchemaType } from "mongoose";
 
 const presentationSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
+    // Basic Info (matching screenshot)
+    title: { type: String, required: true, trim: true }, // Presentation Name
     description: { type: String, trim: true },
-
-    // File details
-    fileUrl: { type: String, trim: true }, // URL or path to presentation file
-    fileType: { type: String, enum: ["pdf", "ppt", "pptx", "image", "video"], default: "pdf" },
-    fileName: { type: String, trim: true },
-    fileSize: { type: Number }, // in bytes
-
-    // Categorization
-    category: { type: String, trim: true }, // e.g., "Product Launch", "Training", etc.
-    products: { type: [String], default: [] }, // Associated product names
     division: { type: String, trim: true },
+    date: { type: Date, default: Date.now },
+
+    // Assignment (matching screenshot)
+    assigningType: { type: String, enum: ["Employee", "Doctor"], default: "Employee" }, // Assigned Type
+    assignedTo: { type: String, trim: true }, // Assigned To (employee/doctor name)
+    assignedToId: { type: String, trim: true }, // ID of assigned person
+
+    // Slides/Gallery
+    slides: [
+      {
+        imageUrl: { type: String }, // URL or path to slide image
+        imageData: { type: String }, // Base64 encoded image data
+        order: { type: Number, default: 0 },
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    // Cover Image (shown in card)
+    coverImage: { type: String }, // URL or base64 of cover image
+
+    // Legacy fields for compatibility
+    fileUrl: { type: String, trim: true },
+    fileType: { type: String, trim: true },
+    fileName: { type: String, trim: true },
+    fileSize: { type: Number },
+    category: { type: String, trim: true },
+    products: { type: [String], default: [] },
 
     // Visibility
     isActive: { type: Boolean, default: true },

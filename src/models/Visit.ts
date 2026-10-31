@@ -55,7 +55,16 @@ const visitSchema = new Schema(
     // Visit photos
     photos: { type: [String], default: [] }, // Base64 or URLs
 
-    // Presentation shown
+    // Presentations shown during visit (multiple presentations can be shown)
+    presentationsShown: [
+      {
+        presentationId: { type: String },
+        presentationTitle: { type: String },
+        shownAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    // Legacy fields - kept for backward compatibility
     presentationShown: { type: Boolean, default: false },
     presentationId: { type: String, trim: true },
 
