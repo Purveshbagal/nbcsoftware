@@ -10,12 +10,11 @@ jobs:
     steps:
       - name: Trigger scheduled team chat message
         env:
-          CHAT_APP_URL: ${{ secrets.CHAT_APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SCHEDULE: ${{ github.event.schedule }}
         run: |
-          if [ -z "$CHAT_APP_URL" ] || [ -z "$CRON_SECRET" ]; then
-            echo "Configure CHAT_APP_URL and CRON_SECRET repository secrets."
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Configure the CRON_SECRET repository secret."
             exit 1
           fi
           if [ "$SCHEDULE" = "30 3 * * *" ]; then
@@ -25,4 +24,4 @@ jobs:
           fi
           curl --fail --silent --show-error --retry 3 \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "$CHAT_APP_URL/api/sfa/chat/birthday-check?job=$JOB"
+            "https://work.nbcpedia.com/api/sfa/chat/birthday-check?job=$JOB"
