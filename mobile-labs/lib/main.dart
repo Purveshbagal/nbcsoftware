@@ -1,9 +1,13 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 
 import "app_theme.dart";
+import "config.dart";
 import "screens/home_shell.dart";
 import "screens/login_screen.dart";
 import "services/api_client.dart";
+import "services/chat_notification_service.dart";
 import "services/location_tracker.dart";
 import "services/session_store.dart";
 import "widgets/permission_prompt.dart";
@@ -80,7 +84,10 @@ class _BootstrapState extends State<_Bootstrap> {
         if (context == null) return;
         await showPermissionPrompt(context);
         await SessionStore.instance.setOnboarded();
+        if (session != null) await _startChatNotifications(session);
       });
+    } else if (session != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _startChatNotifications(session));
     }
   }
 
@@ -91,9 +98,21 @@ class _BootstrapState extends State<_Bootstrap> {
       _session = session;
       _stage = _Stage.home;
     });
+    unawaited(_startChatNotifications(session));
+  }
+
+  Future<void> _startChatNotifications(Session session) async {
+    try {
+      await ChatNotificationService.instance.start(session, apiBaseUrl);
+    } catch (error) {
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text("Chat notifications could not start: $error")),
+      );
+    }
   }
 
   Future<void> _signOut({String? message}) async {
+    await ChatNotificationService.instance.stop();
     await LocationTracker.instance.clear();
     await SessionStore.instance.clear();
     ApiClient.instance.token = null;

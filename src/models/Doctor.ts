@@ -17,8 +17,10 @@ const doctorSchema = new Schema(
     qualification: { type: String, trim: true },
     registrationNumber: { type: String, trim: true },
 
-    state: { type: String, trim: true },
+    state: { type: String, trim: true, default: "Maharashtra" },
     district: { type: String, trim: true },
+    taluka: { type: String, trim: true },
+    village: { type: String, trim: true },
     city: { type: String, trim: true },
     pincode: { type: String, trim: true },
     clinicAddress: { type: String, trim: true },
@@ -29,13 +31,11 @@ const doctorSchema = new Schema(
       longitude: { type: Number },
     },
 
-    // Bank details
-    bankDetails: {
-      bankName: { type: String, trim: true },
-      accountNumber: { type: String, trim: true },
-      ifscCode: { type: String, trim: true },
-      branchName: { type: String, trim: true },
-    },
+    // Bank details (flattened to match mobile-labs format)
+    bankName: { type: String, trim: true },
+    accountNumber: { type: String, trim: true },
+    ifscCode: { type: String, trim: true },
+    branchName: { type: String, trim: true },
 
     // Document uploads (stored as base64 or file paths)
     documents: { type: [String], default: [] },
@@ -56,12 +56,12 @@ const doctorSchema = new Schema(
       enum: ["pending", "approved", "rejected", ""],
       default: ""
     },
-    approvedBy: { username: String, name: String },
+    approvedBy: { username: { type: String }, name: { type: String } },
     approvedAt: { type: Date },
     source: { type: String, enum: ["web", "racer", "survey", ""], default: "" }, // Track where doctor was added
 
     isActive: { type: Boolean, default: true },
-    createdBy: { username: String, name: String },
+    createdBy: { username: { type: String }, name: { type: String } },
   },
   { timestamps: true }
 );

@@ -9,8 +9,11 @@ const employeeSchema = new Schema(
     workType: { type: String, trim: true },
     assignTo: { type: String, trim: true },
 
+    state: { type: String, trim: true, default: "Maharashtra" },
+    district: { type: String, trim: true },
+    taluka: { type: String, trim: true },
+    village: { type: String, trim: true },
     city: { type: String, trim: true },
-    state: { type: String, trim: true },
     address: { type: String, trim: true },
     division: { type: String, trim: true },
     zone: { type: String, trim: true },
@@ -25,7 +28,7 @@ const employeeSchema = new Schema(
     inactiveReason: { type: String, trim: true },
 
     isActive: { type: Boolean, default: true },
-    createdBy: { username: String, name: String },
+    createdBy: { username: { type: String }, name: { type: String } },
 
     // NBC Labs mobile app sign-in. Kept apart from the User model on purpose:
     // NBC Pedia accounts cannot sign in to this app, and the other way round.
@@ -33,14 +36,15 @@ const employeeSchema = new Schema(
     /** Never returned by a query unless asked for with `+appPasswordHash`. */
     appPasswordHash: { type: String, select: false },
     appAccessEnabled: { type: Boolean, default: false },
+    profilePicture: { type: String, trim: true },
 
     /** Last position the app reported, so the live map needs no aggregation. */
     lastLocation: {
-      lat: Number,
-      lng: Number,
-      accuracy: Number,
-      battery: Number,
-      at: Date,
+      lat: { type: Number },
+      lng: { type: Number },
+      accuracy: { type: Number },
+      battery: { type: Number },
+      at: { type: Date },
     },
     lastSeenAt: { type: Date },
     deviceInfo: { type: String, trim: true },

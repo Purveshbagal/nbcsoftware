@@ -80,9 +80,11 @@ export function GivePaymentDialog({
         }
       }}
     >
-      <DialogTrigger render={<Button />}>
-        <BadgeIndianRupee />
-        Give
+      <DialogTrigger asChild>
+        <Button>
+          <BadgeIndianRupee />
+          Give
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

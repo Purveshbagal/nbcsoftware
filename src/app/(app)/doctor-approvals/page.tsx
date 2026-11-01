@@ -88,23 +88,27 @@ export default function DoctorApprovalsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-1 items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading pending doctors...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground text-sm">Loading pending doctors...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Doctor Approvals</h1>
-        <p className="text-gray-600">Review doctors added from Racer NBC and retain every approval decision as history.</p>
+    <div className="flex flex-1 flex-col gap-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Doctor Approvals</h2>
+          <p className="text-muted-foreground text-sm">
+            Review doctors added from Racer NBC and retain every approval decision as history.
+          </p>
+        </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-b pb-4">
         {(["pending", "approved", "rejected"] as const).map((value) => (
           <button
             key={value}
@@ -112,22 +116,24 @@ export default function DoctorApprovalsPage() {
               setStatus(value);
               setSelectedDoctor(null);
             }}
-            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition ${
-              status === value ? "bg-slate-900 text-white" : "bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+            className={`rounded-md px-4 py-2 text-sm font-medium capitalize transition ${
+              status === value
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
           >
-            {value === "pending" ? "Pending approvals" : `${value} history`}
+            {value === "pending" ? "Pending Approvals" : `${value} History`}
           </button>
         ))}
       </div>
 
       {doctors.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <div className="text-gray-400 mb-4">
+        <div className="rounded-lg border border-dashed p-12 text-center">
+          <div className="text-muted-foreground mb-4">
             <Check className="w-16 h-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No {status} doctors</h3>
-          <p className="text-gray-600">There are no doctors in this approval view.</p>
+          <h3 className="text-lg font-semibold mb-2">No {status} doctors</h3>
+          <p className="text-muted-foreground text-sm">There are no doctors in this approval view.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -136,15 +142,15 @@ export default function DoctorApprovalsPage() {
             {doctors.map((doctor) => (
               <div
                 key={doctor._id}
-                className={`bg-white rounded-lg shadow-md p-6 cursor-pointer transition ${
-                  selectedDoctor?._id === doctor._id ? "ring-2 ring-blue-500" : "hover:shadow-lg"
+                className={`rounded-lg border bg-card p-6 cursor-pointer transition ${
+                  selectedDoctor?._id === doctor._id ? "ring-2 ring-primary" : "hover:shadow-md"
                 }`}
                 onClick={() => setSelectedDoctor(doctor)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">{doctor.name}</h3>
-                    <p className="text-sm text-blue-600 font-medium">UIN: {doctor.uinId}</p>
+                    <h3 className="text-lg font-semibold">{doctor.name}</h3>
+                    <p className="text-sm text-primary font-medium">UIN: {doctor.uinId}</p>
                   </div>
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
                     doctor.approvalStatus === "approved"
@@ -157,7 +163,7 @@ export default function DoctorApprovalsPage() {
                   </span>
                 </div>
 
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
+                <div className="space-y-2 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
                     <span>{doctor.hospitalName}</span>
@@ -166,11 +172,11 @@ export default function DoctorApprovalsPage() {
                     <Phone className="w-4 h-4" />
                     <span>{doctor.contactNo}</span>
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground/80">
                     Added by {doctor.createdBy.name} on {new Date(doctor.createdAt).toLocaleDateString()}
                   </p>
                   {doctor.approvedAt && (
-                    <p className="text-xs text-gray-500">Decision made on {new Date(doctor.approvedAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground/80">Decision made on {new Date(doctor.approvedAt).toLocaleDateString()}</p>
                   )}
                 </div>
 
@@ -205,36 +211,36 @@ export default function DoctorApprovalsPage() {
           {/* Doctor Details Panel */}
           <div className="sticky top-8">
             {selectedDoctor ? (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Doctor Details</h2>
+              <div className="rounded-lg border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-6">Doctor Details</h2>
 
                 <div className="space-y-6">
                   {/* Basic Info */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Basic Information</h3>
+                    <h3 className="text-sm font-semibold mb-3">Basic Information</h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Name:</dt>
+                        <dt className="text-muted-foreground">Name:</dt>
                         <dd className="font-medium">{selectedDoctor.name}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">UIN ID:</dt>
-                        <dd className="font-medium text-blue-600">{selectedDoctor.uinId}</dd>
+                        <dt className="text-muted-foreground">UIN ID:</dt>
+                        <dd className="font-medium text-primary">{selectedDoctor.uinId}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Gender:</dt>
+                        <dt className="text-muted-foreground">Gender:</dt>
                         <dd className="font-medium capitalize">{selectedDoctor.gender}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Qualification:</dt>
+                        <dt className="text-muted-foreground">Qualification:</dt>
                         <dd className="font-medium">{selectedDoctor.qualification}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Speciality:</dt>
+                        <dt className="text-muted-foreground">Speciality:</dt>
                         <dd className="font-medium">{selectedDoctor.speciality}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Category:</dt>
+                        <dt className="text-muted-foreground">Category:</dt>
                         <dd className="font-medium">{selectedDoctor.category}</dd>
                       </div>
                     </dl>
@@ -242,15 +248,15 @@ export default function DoctorApprovalsPage() {
 
                   {/* Contact Info */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Contact Information</h3>
+                    <h3 className="text-sm font-semibold mb-3">Contact Information</h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Phone:</dt>
+                        <dt className="text-muted-foreground">Phone:</dt>
                         <dd className="font-medium">{selectedDoctor.contactNo}</dd>
                       </div>
                       {selectedDoctor.email && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600">Email:</dt>
+                          <dt className="text-muted-foreground">Email:</dt>
                           <dd className="font-medium">{selectedDoctor.email}</dd>
                         </div>
                       )}
@@ -259,15 +265,15 @@ export default function DoctorApprovalsPage() {
 
                   {/* Hospital Info */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Hospital Information</h3>
+                    <h3 className="text-sm font-semibold mb-3">Hospital Information</h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <dt className="text-gray-600">Hospital:</dt>
+                        <dt className="text-muted-foreground">Hospital:</dt>
                         <dd className="font-medium">{selectedDoctor.hospitalName}</dd>
                       </div>
                       {selectedDoctor.hospitalAddress && (
                         <div>
-                          <dt className="text-gray-600 mb-1">Address:</dt>
+                          <dt className="text-muted-foreground mb-1">Address:</dt>
                           <dd className="font-medium text-sm">{selectedDoctor.hospitalAddress}</dd>
                         </div>
                       )}
@@ -277,12 +283,12 @@ export default function DoctorApprovalsPage() {
                   {/* Location */}
                   {selectedDoctor.location && (
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Location</h3>
+                      <h3 className="text-sm font-semibold mb-3">Location</h3>
                       <a
                         href={`https://www.google.com/maps?q=${selectedDoctor.location.latitude},${selectedDoctor.location.longitude}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm"
+                        className="flex items-center gap-2 text-primary hover:underline text-sm"
                       >
                         <MapPin className="w-4 h-4" />
                         View on Google Maps
@@ -293,22 +299,22 @@ export default function DoctorApprovalsPage() {
                   {/* Bank Details */}
                   {selectedDoctor.bankDetails && (
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Bank Details</h3>
+                      <h3 className="text-sm font-semibold mb-3">Bank Details</h3>
                       <dl className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <dt className="text-gray-600">Bank:</dt>
+                          <dt className="text-muted-foreground">Bank:</dt>
                           <dd className="font-medium">{selectedDoctor.bankDetails.bankName}</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-gray-600">Account:</dt>
+                          <dt className="text-muted-foreground">Account:</dt>
                           <dd className="font-medium">{selectedDoctor.bankDetails.accountNumber}</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-gray-600">IFSC:</dt>
+                          <dt className="text-muted-foreground">IFSC:</dt>
                           <dd className="font-medium">{selectedDoctor.bankDetails.ifscCode}</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-gray-600">Branch:</dt>
+                          <dt className="text-muted-foreground">Branch:</dt>
                           <dd className="font-medium">{selectedDoctor.bankDetails.branchName}</dd>
                         </div>
                       </dl>
@@ -318,16 +324,16 @@ export default function DoctorApprovalsPage() {
                   {/* Documents */}
                   {selectedDoctor.documents && selectedDoctor.documents.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Documents</h3>
-                      <p className="text-sm text-gray-600">{selectedDoctor.documents.length} document(s) uploaded</p>
+                      <h3 className="text-sm font-semibold mb-3">Documents</h3>
+                      <p className="text-sm text-muted-foreground">{selectedDoctor.documents.length} document(s) uploaded</p>
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <Eye className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Select a doctor to view details</p>
+              <div className="rounded-lg border border-dashed p-12 text-center">
+                <Eye className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-sm">Select a doctor to view details</p>
               </div>
             )}
           </div>

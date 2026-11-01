@@ -29,7 +29,7 @@ export default async function FirmsPage() {
 
   const [docs, masters, employees] = await Promise.all([
     FirmModel.find({}).sort({ createdAt: -1 }).lean(),
-    loadMasterOptions(["division", "zone", "firm-type", "firm-category", "business-slab"]),
+    loadMasterOptions(["division", "zone", "firm-type", "firm-category", "business-slab", "state", "district", "taluka", "village"]),
     loadEmployeeNames(),
   ]);
 
@@ -67,8 +67,34 @@ export default async function FirmsPage() {
     },
     { key: "transportType", label: "Transport Type", section: "Basic information" },
 
-    { key: "state", label: "State", section: "Address information" },
-    { key: "district", label: "District", section: "Address information" },
+    {
+      key: "state",
+      label: "State",
+      type: "select",
+      options: masters.state || [],
+      section: "Address information",
+    },
+    {
+      key: "district",
+      label: "District",
+      type: "select",
+      options: masters.district || [],
+      section: "Address information",
+    },
+    {
+      key: "taluka",
+      label: "Taluka",
+      type: "select",
+      options: masters.taluka || [],
+      section: "Address information",
+    },
+    {
+      key: "village",
+      label: "Village",
+      type: "select",
+      options: masters.village || [],
+      section: "Address information",
+    },
     { key: "city", label: "City", section: "Address information" },
     { key: "pincode", label: "Pincode", section: "Address information" },
     { key: "address", label: "Firm Address", type: "textarea", wide: true, section: "Address information" },

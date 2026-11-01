@@ -32,7 +32,8 @@ export type FieldType =
   | "select"
   | "textarea"
   | "checkbox"
-  | "multiselect";
+  | "multiselect"
+  | "password";
 
 export type Field = {
   key: string;

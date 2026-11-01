@@ -21,6 +21,13 @@ const APP_MASTERS = new Set([
   "firm-category",
   "announcement",
   "faq-master",
+  "state",
+  "district",
+  "taluka",
+  "village",
+  "travel-mode",
+  "division",
+  "zone",
 ]);
 
 type Option = { name: string; description?: string; value?: number };

@@ -9,11 +9,15 @@ import "holidays_screen.dart";
 import "leave_screen.dart";
 import "media_screen.dart";
 import "orders_screen.dart";
+import "post_update_screen.dart";
 import "profile_screen.dart";
 import "reminders_screen.dart";
 import "support_screen.dart";
 import "sample_request_screen.dart";
 import "targets_screen.dart";
+import "your_advance_screen.dart";
+import "your_attendance_screen.dart";
+import "your_salary_screen.dart";
 
 class MoreScreen extends StatelessWidget {
   final Session session;
@@ -93,6 +97,12 @@ class MoreScreen extends StatelessWidget {
         "Work & attendance",
         [
           (
+            Icons.edit_note_outlined,
+            "Update",
+            "Post your daily work progress",
+            const PostUpdateScreen(),
+          ),
+          (
             Icons.beach_access_outlined,
             "Leave",
             "Requests and approvals",
@@ -109,6 +119,24 @@ class MoreScreen extends StatelessWidget {
             "Holidays",
             "Plan your calendar",
             const HolidaysScreen(),
+          ),
+          (
+            Icons.calendar_today_outlined,
+            "Your Attendance",
+            "Monthly attendance & salary",
+            const YourAttendanceScreen(),
+          ),
+          (
+            Icons.account_balance_wallet_outlined,
+            "Your Advance",
+            "Advance requests & deductions",
+            const YourAdvanceScreen(),
+          ),
+          (
+            Icons.payments_outlined,
+            "Your Salary",
+            "Salary details & history",
+            const YourSalaryScreen(),
           ),
         ],
       ),

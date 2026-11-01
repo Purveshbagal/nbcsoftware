@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, Loader2, Trash2, Users as UsersIcon, IndianRupee } from "lucide-react";
+import { KeyRound, Loader2, Trash2, Users as UsersIcon, IndianRupee, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -39,6 +39,12 @@ import type { UserRecord } from "@/types/user";
 function UserRowActions({ user }: { user: UserRecord }) {
   const router = useRouter();
   const [toggling, setToggling] = React.useState(false);
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [editForm, setEditForm] = React.useState({
+    name: user.name,
+    mobileNumber: user.mobileNumber || "",
+  });
+  const [updating, setUpdating] = React.useState(false);
   const [resetOpen, setResetOpen] = React.useState(false);
   const [newPassword, setNewPassword] = React.useState("");
   const [resetting, setResetting] = React.useState(false);
@@ -50,6 +56,37 @@ function UserRowActions({ user }: { user: UserRecord }) {
   );
   const [updatingBudget, setUpdatingBudget] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  async function handleEdit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setUpdating(true);
+
+    try {
+      const res = await fetch(`/api/users/${user._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name,
+          mobileNumber: editForm.mobileNumber,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Failed to update user");
+        return;
+      }
+
+      toast.success("User details updated.");
+      setEditOpen(false);
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setUpdating(false);
+    }
+  }
 
   async function toggleActive() {
     setToggling(true);
@@ -152,6 +189,10 @@ function UserRowActions({ user }: { user: UserRecord }) {
 
   return (
     <div className="flex justify-end gap-2">
+      <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
+        <Pencil />
+        Edit
+      </Button>
       <Button size="sm" variant="outline" onClick={() => setBudgetOpen(true)}>
         <IndianRupee />
         Budget Limit
@@ -179,6 +220,62 @@ function UserRowActions({ user }: { user: UserRecord }) {
         <Trash2 />
         Delete
       </Button>
+
+      <Dialog open={editOpen} onOpenChange={(open) => {
+        setEditOpen(open);
+        if (!open) {
+          setError(null);
+          setEditForm({ name: user.name, mobileNumber: user.mobileNumber || "" });
+        }
+      }}>
+        <DialogContent>
+          <form onSubmit={handleEdit} className="flex flex-col gap-4">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update details for {user.username}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-2">
+              <Label htmlFor={`edit-name-${user._id}`}>Name</Label>
+              <Input
+                id={`edit-name-${user._id}`}
+                value={editForm.name}
+                onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor={`edit-mobile-${user._id}`}>Mobile Number</Label>
+              <Input
+                id={`edit-mobile-${user._id}`}
+                type="tel"
+                value={editForm.mobileNumber}
+                onChange={(e) => setEditForm(prev => ({ ...prev, mobileNumber: e.target.value }))}
+                pattern="[0-9]{10}"
+                maxLength={10}
+                placeholder="Enter mobile number"
+              />
+            </div>
+
+            {error && (
+              <p className="text-destructive text-sm" role="alert">
+                {error}
+              </p>
+            )}
+
+            <DialogFooter>
+              <Button type="submit" disabled={updating}>
+                {updating && <Loader2 className="size-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent>
@@ -324,6 +421,7 @@ export function UsersTable({ users }: { users: UserRecord[] }) {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Username</TableHead>
+            <TableHead>Mobile Number</TableHead>
             <TableHead>Budget Limit</TableHead>
             <TableHead>Available</TableHead>
             <TableHead>Status</TableHead>
@@ -337,6 +435,9 @@ export function UsersTable({ users }: { users: UserRecord[] }) {
               <TableCell className="font-medium">{user.name}</TableCell>
               <TableCell className="font-mono text-xs">
                 {user.username}
+              </TableCell>
+              <TableCell className="text-sm">
+                {user.mobileNumber || "-"}
               </TableCell>
               <TableCell className="font-medium">
                 {user.budgetLimit?.totalLimit

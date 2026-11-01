@@ -3,6 +3,7 @@ import { Stethoscope, CheckCircle, XCircle, Clock, TrendingUp } from "lucide-rea
 import { AutoRefresh } from "@/components/auto-refresh";
 import { LedgerStat, UserFilter } from "@/components/payment-ledger";
 import { PageHeader } from "@/components/sfa/page-header";
+import { SelectFilter } from "@/components/select-filter";
 import { connectToDatabase } from "@/lib/mongodb";
 import { formatRupees, loadLedger, summarizeByUser } from "@/lib/payment-ledger";
 import DoctorModel from "@/models/Doctor";
@@ -140,47 +141,31 @@ export default async function DoctorEngagementReportPage({
       <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
         <UserFilter basePath="/survey-reports/doctor-engagement" users={users} selected={selectedUser} />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium">City</label>
-          <select
-            className="bg-background border-input ring-offset-background placeholder:text-muted-foreground focus:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
-            value={selectedCity || "all"}
-            onChange={(e) => {
-              const params = new URLSearchParams();
-              if (selectedUser) params.set("user", selectedUser);
-              if (e.target.value !== "all") params.set("city", e.target.value);
-              if (selectedStatus) params.set("status", selectedStatus);
-              const query = params.toString();
-              window.location.href = `/survey-reports/doctor-engagement${query ? `?${query}` : ""}`;
-            }}
-          >
-            <option value="all">All cities</option>
-            {cities.map((city) => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-        </div>
+        <SelectFilter
+          label="City"
+          value={selectedCity || "all"}
+          options={[
+            { value: "all", label: "All cities" },
+            ...cities.map((city) => ({ value: city, label: city })),
+          ]}
+          basePath="/survey-reports/doctor-engagement"
+          currentParams={{ user: selectedUser, city: selectedCity, status: selectedStatus }}
+          paramName="city"
+        />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium">Approval Status</label>
-          <select
-            className="bg-background border-input ring-offset-background placeholder:text-muted-foreground focus:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
-            value={selectedStatus || "all"}
-            onChange={(e) => {
-              const params = new URLSearchParams();
-              if (selectedUser) params.set("user", selectedUser);
-              if (selectedCity) params.set("city", selectedCity);
-              if (e.target.value !== "all") params.set("status", e.target.value);
-              const query = params.toString();
-              window.location.href = `/survey-reports/doctor-engagement${query ? `?${query}` : ""}`;
-            }}
-          >
-            <option value="all">All statuses</option>
-            <option value="approved">Approved</option>
-            <option value="pending">Pending</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
+        <SelectFilter
+          label="Approval Status"
+          value={selectedStatus || "all"}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "approved", label: "Approved" },
+            { value: "pending", label: "Pending" },
+            { value: "rejected", label: "Rejected" },
+          ]}
+          basePath="/survey-reports/doctor-engagement"
+          currentParams={{ user: selectedUser, city: selectedCity, status: selectedStatus }}
+          paramName="status"
+        />
       </div>
 
       <div className="bg-card rounded-lg border">

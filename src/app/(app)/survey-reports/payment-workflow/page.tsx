@@ -3,6 +3,7 @@ import { CircleCheckBig, Clock, FileCheck, Hourglass, Users } from "lucide-react
 import { AutoRefresh } from "@/components/auto-refresh";
 import { LedgerStat, LedgerTable, UserFilter } from "@/components/payment-ledger";
 import { PageHeader } from "@/components/sfa/page-header";
+import { SelectFilter } from "@/components/select-filter";
 import { connectToDatabase } from "@/lib/mongodb";
 import { formatRupees, loadLedger, summarizeByUser, type LedgerStage, STAGE_LABEL } from "@/lib/payment-ledger";
 
@@ -96,27 +97,20 @@ export default async function PaymentWorkflowReportPage({
       <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
         <UserFilter basePath="/survey-reports/payment-workflow" users={users} selected={selectedUser} />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium">Payment Stage</label>
-          <select
-            className="bg-background border-input ring-offset-background placeholder:text-muted-foreground focus:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
-            value={selectedStage || "all"}
-            onChange={(e) => {
-              const params = new URLSearchParams();
-              if (selectedUser) params.set("user", selectedUser);
-              if (e.target.value !== "all") params.set("stage", e.target.value);
-              const query = params.toString();
-              window.location.href = `/survey-reports/payment-workflow${query ? `?${query}` : ""}`;
-            }}
-          >
-            <option value="all">All stages</option>
-            {(Object.keys(STAGE_LABEL) as LedgerStage[]).map((stage) => (
-              <option key={stage} value={stage}>
-                {STAGE_LABEL[stage]}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectFilter
+          label="Payment Stage"
+          value={selectedStage || "all"}
+          options={[
+            { value: "all", label: "All stages" },
+            ...(Object.keys(STAGE_LABEL) as LedgerStage[]).map((stage) => ({
+              value: stage,
+              label: STAGE_LABEL[stage],
+            })),
+          ]}
+          basePath="/survey-reports/payment-workflow"
+          currentParams={{ user: selectedUser, stage: selectedStage }}
+          paramName="stage"
+        />
       </div>
 
       <LedgerTable

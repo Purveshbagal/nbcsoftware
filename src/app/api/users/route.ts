@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { username, name, password, budgetLimit } = await request.json();
+  const { username, name, mobileNumber, password, budgetLimit } = await request.json();
 
   if (!username || !name || !password) {
     return NextResponse.json(
@@ -69,6 +69,10 @@ export async function POST(request: Request) {
     role: "field",
   };
 
+  if (mobileNumber) {
+    userData.mobileNumber = mobileNumber.trim();
+  }
+
   if (budgetLimit !== undefined && budgetLimit !== "") {
     const limitAmount = Number(budgetLimit);
     userData.budgetLimit = {
@@ -86,6 +90,7 @@ export async function POST(request: Request) {
         _id: user._id.toString(),
         username: user.username,
         name: user.name,
+        mobileNumber: user.mobileNumber,
         role: user.role,
         isActive: user.isActive,
         createdAt: user.createdAt,

@@ -15,10 +15,8 @@ export default async function PresentationPage() {
     loadMasterOptions(["division"]),
   ]);
 
-  // Add PEDIA and DERMA to divisions if not already present
-  const allDivisions = ["PEDIA", "DERMA", ...(masters.division || [])].filter(
-    (div, index, self) => self.indexOf(div) === index
-  );
+  // Use all divisions from masters
+  const allDivisions = masters.division || [];
 
   // Convert MongoDB documents to plain objects
   const plainPresentations = presentations.map((p) => ({

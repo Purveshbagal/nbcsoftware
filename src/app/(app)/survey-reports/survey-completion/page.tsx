@@ -3,6 +3,7 @@ import { FileCheck, FileX, Hourglass, Users } from "lucide-react";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { LedgerStat, LedgerTable, UserFilter } from "@/components/payment-ledger";
 import { PageHeader } from "@/components/sfa/page-header";
+import { SelectFilter } from "@/components/select-filter";
 import { connectToDatabase } from "@/lib/mongodb";
 import { formatRupees, loadLedger, summarizeByUser } from "@/lib/payment-ledger";
 
@@ -83,24 +84,18 @@ export default async function SurveyCompletionReportPage({
       <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
         <UserFilter basePath="/survey-reports/survey-completion" users={users} selected={selectedUser} />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium">Survey Status</label>
-          <select
-            className="bg-background border-input ring-offset-background placeholder:text-muted-foreground focus:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
-            value={selectedStatus || "all"}
-            onChange={(e) => {
-              const params = new URLSearchParams();
-              if (selectedUser) params.set("user", selectedUser);
-              if (e.target.value !== "all") params.set("status", e.target.value);
-              const query = params.toString();
-              window.location.href = `/survey-reports/survey-completion${query ? `?${query}` : ""}`;
-            }}
-          >
-            <option value="all">All surveys</option>
-            <option value="completed">Completed surveys</option>
-            <option value="pending">Pending surveys</option>
-          </select>
-        </div>
+        <SelectFilter
+          label="Survey Status"
+          value={selectedStatus || "all"}
+          options={[
+            { value: "all", label: "All surveys" },
+            { value: "completed", label: "Completed surveys" },
+            { value: "pending", label: "Pending surveys" },
+          ]}
+          basePath="/survey-reports/survey-completion"
+          currentParams={{ user: selectedUser, status: selectedStatus }}
+          paramName="status"
+        />
       </div>
 
       <LedgerTable

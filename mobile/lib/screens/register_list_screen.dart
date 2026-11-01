@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 
-import "../models/registration.dart";
 import "../models/payment.dart";
 import "../services/api_client.dart";
 import "../widgets/status_chip.dart";

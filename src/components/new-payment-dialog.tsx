@@ -82,9 +82,11 @@ export function NewPaymentDialog({
         }
       }}
     >
-      <DialogTrigger render={<Button />}>
-        <Plus />
-        New
+      <DialogTrigger asChild>
+        <Button>
+          <Plus />
+          New
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -9,12 +9,16 @@ const administratorSchema = new Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, trim: true, lowercase: true },
     contactNo: { type: String, trim: true },
+    state: { type: String, trim: true, default: "Maharashtra" },
+    district: { type: String, trim: true },
+    taluka: { type: String, trim: true },
+    village: { type: String, trim: true },
     city: { type: String, trim: true },
     division: { type: String, trim: true },
     zone: { type: String, trim: true },
     adminType: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
-    createdBy: { username: String, name: String },
+    createdBy: { username: { type: String }, name: { type: String } },
   },
   { timestamps: true }
 );

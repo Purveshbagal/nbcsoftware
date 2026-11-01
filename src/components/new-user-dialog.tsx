@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 const emptyForm = {
   username: "",
   name: "",
+  mobileNumber: "",
   password: "",
   budgetLimit: "",
 };
@@ -77,9 +78,11 @@ export function NewUserDialog() {
         }
       }}
     >
-      <DialogTrigger render={<Button />}>
-        <Plus />
-        New User
+      <DialogTrigger asChild>
+        <Button>
+          <Plus />
+          New User
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -112,6 +115,22 @@ export function NewUserDialog() {
               autoComplete="off"
               required
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="mobileNumber">Mobile Number</Label>
+            <Input
+              id="mobileNumber"
+              type="tel"
+              value={form.mobileNumber}
+              onChange={(e) => updateField("mobileNumber", e.target.value)}
+              placeholder="Enter mobile number"
+              pattern="[0-9]{10}"
+              maxLength={10}
+            />
+            <p className="text-xs text-muted-foreground">
+              10-digit mobile number (optional)
+            </p>
           </div>
 
           <div className="grid gap-2">

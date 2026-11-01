@@ -32,6 +32,9 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
   final _documents = <Map<String, dynamic>>[];
 
   Map<String, List<String>> _masters = {};
+  List<String> _filteredDistricts = [];
+  List<String> _filteredTalukas = [];
+  List<String> _filteredVillages = [];
   Position? _selectedLocation;
   bool _saving = false;
   bool _loadingLocation = false;
@@ -52,6 +55,12 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
       final quals = _names(qualResp["qualifications"]);
       final specs = _names(specResp["specialities"]);
 
+      // Load all districts for Maharashtra
+      final districtsResp = await ApiClient.instance.get("/masters/locations?type=district&parent=Maharashtra");
+      final districtsList = (districtsResp["options"] as List? ?? [])
+          .map((opt) => opt["name"] as String)
+          .toList();
+
       if (!mounted) return;
       setState(() {
         _masters = {
@@ -59,11 +68,78 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
           "doctor-speciality": specs,
           "doctor-category": const ["Important", "Super Important", "A"],
         };
+        _filteredDistricts = districtsList;
+        // Set default state to Maharashtra
+        _values["state"] = "Maharashtra";
       });
     } catch (e) {
-      // Fallback to old masters API
-      final m = await ApiClient.instance.masters(["doctor-speciality", "qualification", "doctor-category"]);
-      if (mounted) setState(() => _masters = m);
+      print("Error loading masters: $e");
+    }
+  }
+
+  Future<void> _onDistrictChanged(String? district) async {
+    if (district == null || district.isEmpty) {
+      setState(() {
+        _values["district"] = "";
+        _values["taluka"] = "";
+        _values["village"] = "";
+        _filteredTalukas = [];
+        _filteredVillages = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _values["district"] = district;
+      _values["taluka"] = "";
+      _values["village"] = "";
+      _filteredVillages = [];
+    });
+
+    try {
+      final resp = await ApiClient.instance.get("/masters/locations?type=taluka&parent=${Uri.encodeComponent(district)}");
+      final talukasList = (resp["options"] as List? ?? [])
+          .map((opt) => opt["name"] as String)
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _filteredTalukas = talukasList;
+        });
+      }
+    } catch (e) {
+      print("Error loading talukas: $e");
+    }
+  }
+
+  Future<void> _onTalukaChanged(String? taluka) async {
+    if (taluka == null || taluka.isEmpty) {
+      setState(() {
+        _values["taluka"] = "";
+        _values["village"] = "";
+        _filteredVillages = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _values["taluka"] = taluka;
+      _values["village"] = "";
+    });
+
+    try {
+      final resp = await ApiClient.instance.get("/masters/locations?type=village&parent=${Uri.encodeComponent(taluka)}");
+      final villagesList = (resp["options"] as List? ?? [])
+          .map((opt) => opt["name"] as String)
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _filteredVillages = villagesList;
+        });
+      }
+    } catch (e) {
+      print("Error loading villages: $e");
     }
   }
 
@@ -101,7 +177,7 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
     );
   }
 
-  Widget _pick(String key, String label, String master, {List<String> fallback = const []}) {
+  Widget _pick(String key, String label, String master, {List<String> fallback = const [], Function(String?)? onChanged}) {
     final options = _masters[master]?.isNotEmpty == true ? _masters[master]! : fallback;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -109,7 +185,25 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
         label: label,
         value: _values[key],
         options: options,
-        onChanged: (v) => setState(() => _values[key] = v),
+        onChanged: (v) {
+          setState(() => _values[key] = v);
+          onChanged?.call(v);
+        },
+      ),
+    );
+  }
+
+  Widget _locationPick(String key, String label, List<String> options, {Function(String?)? onChanged}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: PickerField(
+        label: label,
+        value: _values[key],
+        options: options,
+        onChanged: (v) {
+          setState(() => _values[key] = v);
+          onChanged?.call(v);
+        },
       ),
     );
   }
@@ -184,17 +278,14 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
         if (files != null && files.isNotEmpty) {
           final file = files.first;
           final bytes = await file.readAsBytes();
-
-          if (bytes != null) {
-            final base64String = base64Encode(bytes);
-            setState(() {
-              _documents.add({
-                'name': file.name,
-                'data': base64String,
-                'type': file.extension,
-              });
+          final base64String = base64Encode(bytes);
+          setState(() {
+            _documents.add({
+              'name': file.name,
+              'data': base64String,
+              'type': file.extension,
             });
-          }
+          });
         }
       }
     } catch (e) {
@@ -264,9 +355,9 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: AppTheme.indigo.withOpacity(0.1),
+                color: AppTheme.indigo.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppTheme.indigo.withOpacity(0.3)),
+                border: Border.all(color: AppTheme.indigo.withValues(alpha: 0.3)),
               ),
               child: const Row(
                 children: [
@@ -301,6 +392,21 @@ class _AddDoctorEnhancedScreenState extends State<AddDoctorEnhancedScreen> {
             _text("hospitalName", "Hospital Name", required: true),
             _text("hospitalAddress", "Hospital Address", lines: 2),
             _text("email", "Email", keyboard: TextInputType.emailAddress),
+
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+
+            // Address Information
+            Text("Address Information", style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            _pick("state", "State", "", fallback: const ["Maharashtra"]),
+            _locationPick("district", "District", _filteredDistricts, onChanged: _onDistrictChanged),
+            _locationPick("taluka", "Taluka", _filteredTalukas, onChanged: _onTalukaChanged),
+            _locationPick("village", "Village", _filteredVillages, onChanged: (v) => setState(() => _values["village"] = v)),
+            _text("city", "City"),
+            _text("pincode", "Pincode", keyboard: TextInputType.number),
+            _text("clinicAddress", "Clinic Address", lines: 2),
 
             const SizedBox(height: 8),
             const Divider(),

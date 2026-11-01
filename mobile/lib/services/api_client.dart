@@ -49,6 +49,39 @@ class ApiClient {
     );
   }
 
+  /// Step 1 of OTP login: Sends OTP to user's WhatsApp. Returns masked number.
+  Future<String> sendLoginOtp(String username, String password) async {
+    final res = await http.post(
+      Uri.parse("$apiBaseUrl/auth/login-with-otp"),
+      headers: const {"Content-Type": "application/json"},
+      body: jsonEncode({"username": username, "password": password}),
+    );
+    final data = _decode(res);
+    return data["sentTo"] as String? ?? "";
+  }
+
+  /// Step 2 of OTP login: Verifies OTP and completes sign-in.
+  Future<Session> verifyLoginOtp(String username, String password, String otp) async {
+    final res = await http.post(
+      Uri.parse("$apiBaseUrl/auth/verify-login-otp"),
+      headers: const {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "username": username,
+        "password": password,
+        "otp": otp,
+      }),
+    );
+    final data = _decode(res);
+    final token = data["token"] as String;
+    final user = data["user"] as Map<String, dynamic>;
+    _token = token;
+    return Session(
+      token: token,
+      username: user["username"] as String,
+      name: user["name"] as String,
+    );
+  }
+
   Future<List<Registration>> fetchRegistrations() async {
     final res = await http.get(
       Uri.parse("$apiBaseUrl/registrations"),

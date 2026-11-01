@@ -21,23 +21,52 @@ export default async function AdministratorsPage() {
 
   const [docs, masters] = await Promise.all([
     AdministratorModel.find({}).sort({ createdAt: -1 }).lean(),
-    loadMasterOptions(["division", "zone"]),
+    loadMasterOptions(["division", "zone", "state", "district", "taluka", "village"]),
   ]);
 
   const fields: Field[] = [
-    { key: "name", label: "Name", required: true },
-    { key: "email", label: "Email", type: "email" },
-    { key: "contactNo", label: "Contact", type: "tel" },
-    { key: "city", label: "City" },
-    { key: "division", label: "Division", type: "select", options: masters.division },
-    { key: "zone", label: "Zone", type: "select", options: masters.zone },
+    { key: "name", label: "Name", required: true, section: "Basic information" },
+    { key: "email", label: "Email", type: "email", section: "Basic information" },
+    { key: "contactNo", label: "Contact", type: "tel", section: "Basic information" },
+    { key: "division", label: "Division", type: "select", options: masters.division, section: "Work information" },
+    { key: "zone", label: "Zone", type: "select", options: masters.zone, section: "Work information" },
     {
       key: "adminType",
       label: "Admin Type",
       type: "select",
       options: ["Super Admin", "Admin", "Manager", "Viewer"],
+      section: "Work information",
     },
-    { key: "isActive", label: "Active", type: "checkbox" },
+    {
+      key: "state",
+      label: "State",
+      type: "select",
+      options: masters.state || [],
+      section: "Address information",
+    },
+    {
+      key: "district",
+      label: "District",
+      type: "select",
+      options: masters.district || [],
+      section: "Address information",
+    },
+    {
+      key: "taluka",
+      label: "Taluka",
+      type: "select",
+      options: masters.taluka || [],
+      section: "Address information",
+    },
+    {
+      key: "village",
+      label: "Village",
+      type: "select",
+      options: masters.village || [],
+      section: "Address information",
+    },
+    { key: "city", label: "City", section: "Address information" },
+    { key: "isActive", label: "Active", type: "checkbox", section: "Status" },
   ];
 
   return (
