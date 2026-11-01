@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { requireAdmin } from "@/lib/sfa-auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import {
@@ -6,19 +7,43 @@ import {
   createDailyTeamMessage,
 } from "@/lib/chat-helpers";
 
+const GITHUB_OIDC_ISSUER = "https://token.actions.githubusercontent.com";
+const GITHUB_OIDC_AUDIENCE = "https://work.nbcpedia.com/sfa-chat-scheduler";
+const GITHUB_OIDC_KEYS = createRemoteJWKSet(
+  new URL("https://token.actions.githubusercontent.com/.well-known/jwks")
+);
+
+async function isAuthorizedScheduledRequest(request: NextRequest) {
+  const authorization = request.headers.get("authorization");
+  if (!authorization?.startsWith("Bearer ")) return false;
+
+  try {
+    const { payload } = await jwtVerify(
+      authorization.slice("Bearer ".length),
+      GITHUB_OIDC_KEYS,
+      {
+        issuer: GITHUB_OIDC_ISSUER,
+        audience: GITHUB_OIDC_AUDIENCE,
+      }
+    );
+
+    return (
+      payload.repository === "Purveshbagal/nbcsoftware" &&
+      payload.repository_owner === "Purveshbagal" &&
+      payload.ref === "refs/heads/main" &&
+      payload.event_name === "schedule" &&
+      payload.workflow_ref ===
+        "Purveshbagal/nbcsoftware/.github/workflows/team-chat-schedule.yml@refs/heads/main"
+    );
+  } catch {
+    return false;
+  }
+}
+
 // GET /api/sfa/chat/birthday-check - Trigger scheduled team chat messages
 export async function GET(request: NextRequest) {
   try {
-    const expectedToken = process.env.CRON_SECRET;
-    if (!expectedToken) {
-      console.error("CRON_SECRET is not configured");
-      return NextResponse.json(
-        { error: "Cron authentication is not configured" },
-        { status: 503 }
-      );
-    }
-
-    if (request.headers.get("authorization") !== `Bearer ${expectedToken}`) {
+    if (!(await isAuthorizedScheduledRequest(request))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
