@@ -60,6 +60,18 @@ function UserRowActions({ user }: { user: UserRecord }) {
   async function handleEdit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    const trimmedName = editForm.name.trim();
+    const trimmedMobileNumber = editForm.mobileNumber.trim();
+
+    if (
+      trimmedName === user.name &&
+      trimmedMobileNumber === (user.mobileNumber || "")
+    ) {
+      setError("Nothing to update");
+      return;
+    }
+
     setUpdating(true);
 
     try {
@@ -67,8 +79,8 @@ function UserRowActions({ user }: { user: UserRecord }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: editForm.name,
-          mobileNumber: editForm.mobileNumber,
+          name: trimmedName,
+          mobileNumber: trimmedMobileNumber,
         }),
       });
 

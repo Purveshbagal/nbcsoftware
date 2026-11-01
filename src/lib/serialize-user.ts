@@ -8,6 +8,7 @@ export function serializeUser(doc: LeanUser): UserRecord {
     _id: doc._id.toString(),
     username: doc.username,
     name: doc.name ?? "",
+    mobileNumber: doc.mobileNumber ?? undefined,
     role: (doc.role ?? "field") as UserRecord["role"],
     isActive: doc.isActive ?? true,
     createdAt: doc.createdAt,
