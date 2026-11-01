@@ -5,19 +5,28 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
+}
+
+interface Slide {
+  imageUrl?: string;
+  imageData?: string;
+  order?: number;
+  uploadedAt?: Date;
 }
 
 export default async function PresentationGalleryPage({ params }: Props) {
+  const { id } = await params;
+
   await connectToDatabase();
 
-  const presentation = await PresentationModel.findById(params.id).lean();
+  const presentation = await PresentationModel.findById(id).lean();
 
   if (!presentation) {
     notFound();
   }
 
-  const slides = presentation.slides || [];
+  const slides = (presentation.slides as Slide[]) || [];
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6">
@@ -41,7 +50,7 @@ export default async function PresentationGalleryPage({ params }: Props) {
 
       {/* Slides Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {slides.map((slide, index) => (
+        {slides.map((slide: Slide, index: number) => (
           <div
             key={index}
             className="group relative overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-md"
