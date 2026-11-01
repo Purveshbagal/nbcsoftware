@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Download,
@@ -480,6 +481,7 @@ export function EntityTable({
   emptyMessage,
   readOnly = false,
   defaults = {},
+  detailHref,
 }: {
   endpoint: string;
   entityName: string;
@@ -492,7 +494,9 @@ export function EntityTable({
   readOnly?: boolean;
   /** Values forced onto every create from this screen. */
   defaults?: Record<string, string>;
+  detailHref?: string;
 }) {
+  const router = useRouter();
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState<Record<string, string>>({});
   const [page, setPage] = React.useState(0);
@@ -648,22 +652,49 @@ export function EntityTable({
               </TableHeader>
               <TableBody>
                 {visible.map((row) => (
-                  <TableRow key={row._id}>
+                  <TableRow
+                    key={row._id}
+                    className={detailHref ? "cursor-pointer" : undefined}
+                    onClick={
+                      detailHref
+                        ? (event) => {
+                            if (
+                              event.target instanceof Element &&
+                              event.target.closest("button, a, input, select")
+                            ) {
+                              return;
+                            }
+                            router.push(`${detailHref}/${row._id}`);
+                          }
+                        : undefined
+                    }
+                  >
                     {columns.map((column) => {
                       const text = cellText(row, column);
+                      const content = column.render ? (
+                        column.render(row)
+                      ) : column.type === "badge" && text ? (
+                        <Badge variant={BADGE_TONE[text.toLowerCase()] ?? "secondary"}>
+                          {text}
+                        </Badge>
+                      ) : (
+                        text || "-"
+                      );
                       return (
                         <TableCell
                           key={column.key}
                           className={column.secondary ? "hidden lg:table-cell" : undefined}
                         >
-                          {column.render ? (
-                            column.render(row)
-                          ) : column.type === "badge" && text ? (
-                            <Badge variant={BADGE_TONE[text.toLowerCase()] ?? "secondary"}>
-                              {text}
-                            </Badge>
+                          {detailHref && column.key === columns[0]?.key ? (
+                            <Link
+                              href={`${detailHref}/${row._id}`}
+                              className="hover:underline"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {content}
+                            </Link>
                           ) : (
-                            text || "-"
+                            content
                           )}
                         </TableCell>
                       );

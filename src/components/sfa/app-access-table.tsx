@@ -64,7 +64,7 @@ function lastSeen(iso: string | null) {
   });
 }
 
-function CredentialsDialog({
+export function CredentialsDialog({
   row,
   onOpenChange,
 }: {

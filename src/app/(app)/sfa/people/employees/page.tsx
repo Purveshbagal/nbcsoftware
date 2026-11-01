@@ -59,6 +59,7 @@ export default async function EmployeesPage() {
         rows={rows}
         columns={columns}
         fields={fields}
+        detailHref="/sfa/people/employees"
         filters={[
           { key: "division", label: "Division", options: ["PEDIA", "DERMA", ...(masters.division || [])] },
           { key: "zone", label: "Zone", options: masters.zone },
