@@ -111,7 +111,7 @@ function emptyFormFor(fields: Field[]): Record<string, string | boolean | string
   for (const field of fields) {
     if (field.type === "checkbox") form[field.key] = true;
     else if (field.type === "multiselect") form[field.key] = [];
-    else form[field.key] = "";
+    else form[field.key] = field.defaultValue ?? "";
   }
   return form;
 }

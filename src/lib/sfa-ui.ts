@@ -42,6 +42,7 @@ export type Field = {
   options?: string[];
   section?: string;
   placeholder?: string;
+  defaultValue?: string;
   required?: boolean;
   /** Takes the full dialog width instead of half. */
   wide?: boolean;

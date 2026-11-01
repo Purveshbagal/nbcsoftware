@@ -54,6 +54,7 @@ export default async function DoctorsPage() {
     { key: "name", label: "Doctor Name", required: true, section: "BASIC INFORMATION" },
     { key: "contactNo", label: "Mobile Number", type: "tel", required: true, section: "BASIC INFORMATION" },
     { key: "registrationNumber", label: "Registration Number", section: "BASIC INFORMATION" },
+    { key: "email", label: "Email", type: "email", section: "BASIC INFORMATION" },
     {
       key: "qualification",
       label: "Qualification",
@@ -86,40 +87,38 @@ export default async function DoctorsPage() {
     // Hospital Information
     { key: "hospitalName", label: "Hospital Name", required: true, section: "Hospital Information" },
     { key: "hospitalAddress", label: "Hospital Address", type: "textarea", wide: true, section: "Hospital Information" },
-    { key: "email", label: "Email", type: "email", section: "Hospital Information" },
-
-    // Address Information
     {
       key: "state",
       label: "State",
       type: "select",
-      options: masters.state || [],
-      section: "Address Information",
+      options: [...new Set(["Maharashtra", ...(masters.state || [])])],
+      defaultValue: "Maharashtra",
+      section: "Hospital Information",
     },
     {
       key: "district",
       label: "District",
       type: "select",
       options: masters.district || [],
-      section: "Address Information",
+      section: "Hospital Information",
     },
     {
       key: "taluka",
       label: "Taluka",
       type: "select",
       options: masters.taluka || [],
-      section: "Address Information",
+      section: "Hospital Information",
     },
     {
       key: "village",
       label: "Village",
       type: "select",
       options: masters.village || [],
-      section: "Address Information",
+      section: "Hospital Information",
     },
-    { key: "city", label: "City", section: "Address Information" },
-    { key: "pincode", label: "Pincode", section: "Address Information" },
-    { key: "clinicAddress", label: "Clinic Address", type: "textarea", wide: true, section: "Address Information" },
+    { key: "city", label: "City", section: "Hospital Information" },
+    { key: "pincode", label: "Pincode", section: "Hospital Information" },
+    { key: "clinicAddress", label: "Clinic Address", type: "textarea", wide: true, section: "Hospital Information" },
 
     // Bank Details
     { key: "bankName", label: "Bank Name (Optional)", section: "Bank Details" },
