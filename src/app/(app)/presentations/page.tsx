@@ -15,6 +15,11 @@ export default async function PresentationPage() {
     loadMasterOptions(["division"]),
   ]);
 
+  // Add PEDIA and DERMA to divisions if not already present
+  const allDivisions = ["PEDIA", "DERMA", ...(masters.division || [])].filter(
+    (div, index, self) => self.indexOf(div) === index
+  );
+
   // Convert MongoDB documents to plain objects
   const plainPresentations = presentations.map((p) => ({
     _id: p._id.toString(),
@@ -39,7 +44,7 @@ export default async function PresentationPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Presentation</h1>
         <div className="flex gap-2">
-          <AddPresentationButton divisions={masters.division} />
+          <AddPresentationButton divisions={allDivisions} />
           <button className="flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
             <span>▼</span>
             Advance Filters

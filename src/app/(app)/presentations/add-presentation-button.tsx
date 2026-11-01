@@ -134,8 +134,6 @@ export function AddPresentationButton({ divisions }: Props) {
                   required
                 >
                   <option value="">Select Division</option>
-                  <option value="PEDIA">PEDIA</option>
-                  <option value="DERMA">DERMA</option>
                   {divisions.map((div) => (
                     <option key={div} value={div}>
                       {div}
