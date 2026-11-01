@@ -10,25 +10,9 @@ import DoctorModel from "@/models/Doctor";
 
 const columns: Column[] = [
   { key: "name", label: "Doctor Name" },
-  { key: "hospitalName", label: "Hospital" },
-  { key: "contactNo", label: "Contact No" },
-  { key: "speciality", label: "Speciality" },
-  { key: "category", label: "Category" },
-  { key: "qualification", label: "Qualification", secondary: true },
-  { key: "registrationNumber", label: "Registration No", secondary: true },
-  { key: "email", label: "Email", secondary: true },
-  { key: "gender", label: "Gender", secondary: true },
-  { key: "state", label: "State", secondary: true },
-  { key: "district", label: "District", secondary: true },
-  { key: "taluka", label: "Taluka", secondary: true },
-  { key: "village", label: "Village", secondary: true },
-  { key: "city", label: "City", secondary: true },
-  { key: "pincode", label: "Pincode", secondary: true },
-  { key: "bankName", label: "Bank Name", secondary: true },
-  { key: "accountNumber", label: "Account Number", secondary: true },
-  { key: "ifscCode", label: "IFSC Code", secondary: true },
-  { key: "branchName", label: "Branch Name", secondary: true },
-  { key: "createdAt", label: "Added On", type: "date", secondary: true },
+  { key: "qualification", label: "Qualification" },
+  { key: "contactNo", label: "Mobile Number" },
+  { key: "hospitalName", label: "Hospital Name" },
 ];
 
 export default async function DoctorsPage() {
@@ -126,6 +110,9 @@ export default async function DoctorsPage() {
     { key: "ifscCode", label: "IFSC Code (Optional)", section: "Bank Details" },
     { key: "branchName", label: "Branch Name (Optional)", section: "Bank Details" },
   ];
+  const createFields = fields.filter(
+    ({ key }) => !["city", "pincode", "clinicAddress"].includes(key),
+  );
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -139,6 +126,8 @@ export default async function DoctorsPage() {
         rows={rows}
         columns={columns}
         fields={fields}
+        createFields={createFields}
+        detailHref="/sfa/people/doctors"
         filters={[
           { key: "speciality", label: "Speciality", options: masters["doctor-speciality"] },
           { key: "category", label: "Category", options: masters["doctor-category"] },

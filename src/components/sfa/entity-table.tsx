@@ -367,6 +367,7 @@ function EntityDialog({
   endpoint,
   entityName,
   fields,
+  createFields,
   row,
   open,
   onOpenChange,
@@ -375,6 +376,7 @@ function EntityDialog({
   endpoint: string;
   entityName: string;
   fields: Field[];
+  createFields?: Field[];
   row: EntityRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -387,7 +389,7 @@ function EntityDialog({
           key={row?._id ?? "new"}
           endpoint={endpoint}
           entityName={entityName}
-          fields={fields}
+          fields={row || !createFields ? fields : createFields}
           row={row}
           defaults={defaults}
           onDone={() => onOpenChange(false)}
@@ -476,6 +478,7 @@ export function EntityTable({
   rows,
   columns,
   fields,
+  createFields,
   filters = [],
   labelKey = "name",
   emptyMessage,
@@ -488,6 +491,7 @@ export function EntityTable({
   rows: EntityRow[];
   columns: Column[];
   fields: Field[];
+  createFields?: Field[];
   filters?: FilterSpec[];
   labelKey?: string;
   emptyMessage?: string;
@@ -768,6 +772,7 @@ export function EntityTable({
           endpoint={endpoint}
           entityName={entityName}
           fields={fields}
+          createFields={createFields}
           row={editing}
           open={dialogOpen}
           onOpenChange={setDialogOpen}
