@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireAdmin } from "@/lib/sfa-auth";
+import { requireAdmin, requireUser } from "@/lib/sfa-auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { readJsonBody } from "@/lib/read-json";
 import ExpenseRequestModel from "@/models/ExpenseRequest";

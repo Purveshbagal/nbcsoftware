@@ -37,12 +37,14 @@ export async function GET(request: Request) {
       givenDate: activeAdvance.givenDate,
       deductFromMonth: activeAdvance.deductFromMonth,
       installmentFromMonth: activeAdvance.installmentFromMonth,
-      installments: activeAdvance.installments?.map((inst) => ({
-        month: inst.month,
-        amount: inst.amount,
-        status: inst.status,
-        deductedOn: inst.deductedOn,
-      })),
+      installments: Array.isArray(activeAdvance.installments)
+        ? activeAdvance.installments.map((inst: any) => ({
+            month: inst.month,
+            amount: inst.amount,
+            status: inst.status,
+            deductedOn: inst.deductedOn,
+          }))
+        : undefined,
     },
   });
 }

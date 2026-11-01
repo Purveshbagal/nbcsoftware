@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { requireAdmin } from "@/lib/sfa-auth";
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     const message = await ChatMessageModel.create({
       conversationId: teamChat._id,
       senderType: "admin",
-      senderId: auth.session.userId,
+      senderId: new mongoose.Types.ObjectId(auth.session.userId),
       senderName: auth.session.name || "Admin",
       senderProfilePic: "", // Admin doesn't have profile pic for now
       messageType,
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
     // Update last message in conversation
     teamChat.lastMessage = {
       text: messageType === "text" ? text.trim() : "📷 Image",
-      senderId: auth.session.userId,
+      senderId: new mongoose.Types.ObjectId(auth.session.userId),
       senderName: auth.session.name || "Admin",
       createdAt: message.createdAt,
     };

@@ -86,9 +86,11 @@ export async function GET(request: Request) {
 
   let advanceDeduction = 0;
   if (advance && advance.installments) {
-    const monthInstallment = advance.installments.find(
-      (inst) => inst.month === month && inst.status === "deducted"
-    );
+    const monthInstallment = Array.isArray(advance.installments)
+      ? advance.installments.find(
+          (inst: any) => inst.month === month && inst.status === "deducted"
+        )
+      : undefined;
     if (monthInstallment) {
       advanceDeduction = monthInstallment.amount || 0;
     }

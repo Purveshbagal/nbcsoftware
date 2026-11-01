@@ -14,7 +14,7 @@ export async function PATCH(
   if (auth.error) return auth.error;
 
   const { id } = await params;
-  const body = await readJsonBody(request);
+  const body = (await readJsonBody<Record<string, any>>(request)) ?? {};
   const { status, reviewRemarks } = body;
 
   if (!status || !["approved", "rejected"].includes(status)) {

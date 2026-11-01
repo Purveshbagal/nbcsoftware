@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   if (auth.error) return auth.error;
 
   const employee = auth.employee!;
-  const body = await readJsonBody(request);
+  const body = (await readJsonBody<Record<string, any>>(request)) ?? {};
 
   const { leaveType, fromDate, toDate, reason } = body;
 

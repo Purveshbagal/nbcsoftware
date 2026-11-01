@@ -50,9 +50,11 @@ async function verifyEmployeeToken(token: string) {
 }
 
 export type EmployeeContext = {
+  _id: any;
   employeeId: string;
   name: string;
   username: string;
+  appUsername?: string;
   zone: string;
   division: string;
   designation: string;
@@ -101,14 +103,20 @@ export async function requireEmployee(
 
   return {
     employee: {
+      _id: doc._id,
       employeeId: doc._id.toString(),
       name: doc.name,
       username: doc.appUsername ?? payload.username,
+      appUsername: doc.appUsername ?? payload.username,
       zone: doc.zone ?? "",
       division: doc.division ?? "",
       designation: doc.designation ?? "",
     },
   };
+}
+
+export async function requireLabsAuth(request: Request) {
+  return requireEmployee(request);
 }
 
 /** The India-time calendar day (YYYY-MM-DD) for `date`. */

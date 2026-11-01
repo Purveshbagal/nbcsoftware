@@ -13,7 +13,7 @@ export async function PATCH(
   if (auth.error) return auth.error;
 
   const { id } = await params;
-  const body = await readJsonBody(request);
+  const body = (await readJsonBody<Record<string, any>>(request)) ?? {};
 
   const { installmentIndex, addToNext } = body;
 
@@ -58,7 +58,7 @@ export async function PATCH(
   if (addToNext === true) {
     // Add amount to next pending installment
     const nextIndex = advance.installments.findIndex(
-      (inst, idx) => idx > installmentIndex && inst.status === "pending"
+      (inst: any, idx: number) => idx > installmentIndex && inst.status === "pending"
     );
 
     if (nextIndex >= 0) {
@@ -71,7 +71,7 @@ export async function PATCH(
     const [year, month] = currentMonth.split("-").map(Number);
 
     for (let i = installmentIndex + 1; i < advance.installments.length; i++) {
-      const inst = advance.installments[i];
+      const inst: any = advance.installments[i];
       const [instYear, instMonth] = inst.month.split("-").map(Number);
       const date = new Date(instYear, instMonth, 1);
       date.setMonth(date.getMonth() + 1);

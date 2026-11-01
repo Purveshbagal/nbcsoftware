@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     // Update holidays with calculated dates
     // This is a placeholder - in production, fetch from actual API
-    const updatedHolidays = settings.holidays.map((holiday) => {
+    const updatedHolidays = settings.holidays.map((holiday: any) => {
       if (!holiday.autoFetch) return holiday;
 
       // Fixed holidays

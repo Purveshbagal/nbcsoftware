@@ -88,7 +88,7 @@ export async function POST(
     const message = await ChatMessageModel.create({
       conversationId: new mongoose.Types.ObjectId(conversationId),
       senderType: "admin",
-      senderId: auth.session.userId,
+      senderId: new mongoose.Types.ObjectId(auth.session.userId),
       senderName: auth.session.name || "Admin",
       senderProfilePic: "",
       messageType,
@@ -100,7 +100,7 @@ export async function POST(
     // Update conversation's last message
     await updateConversationLastMessage(conversationId, {
       text: messageType === "text" ? text.trim() : "📷 Image",
-      senderId: auth.session.userId,
+      senderId: new mongoose.Types.ObjectId(auth.session.userId),
       senderName: auth.session.name || "Admin",
       createdAt: message.createdAt,
     });

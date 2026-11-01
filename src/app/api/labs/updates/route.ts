@@ -11,10 +11,10 @@ import EmployeeUpdateModel from "@/models/EmployeeUpdate";
 export async function POST(request: Request) {
   const auth = await requireLabsAuth(request);
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+    return auth.error;
   }
 
-  const body = await readJsonBody(request);
+  const body = (await readJsonBody<Record<string, any>>(request)) ?? {};
   const updateText = String(body?.updateText ?? "").trim();
   const location = body?.location as { latitude?: number; longitude?: number } | undefined;
   const deviceInfo = String(body?.device ?? "").slice(0, 200);
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const auth = await requireLabsAuth(request);
   if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+    return auth.error;
   }
 
   const { searchParams } = new URL(request.url);

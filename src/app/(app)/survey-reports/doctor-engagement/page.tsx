@@ -146,7 +146,13 @@ export default async function DoctorEngagementReportPage({
           value={selectedCity || "all"}
           options={[
             { value: "all", label: "All cities" },
-            ...cities.map((city) => ({ value: city, label: city })),
+            ...Array.from(
+              new Set(
+                cities
+                  .filter((city): city is string => typeof city === "string" && city.trim().length > 0)
+                  .map((city) => city.trim())
+              )
+            ).map((city) => ({ value: city, label: city })),
           ]}
           basePath="/survey-reports/doctor-engagement"
           currentParams={{ user: selectedUser, city: selectedCity, status: selectedStatus }}
