@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     isActive: true,
     $or: [
       { assignedTo: employee.name },
-      { assignedToId: employee._id?.toString() },
+      { assignedToId: employee.employeeId },
       { division: employee.division },
       { assigningType: "Employee" }, // All employee presentations
     ]
