@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   await connectToDatabase();
 
   const user = await UserModel.findOne({ username }).select(
-    "+password name mobileNumber isActive"
+    "password name mobileNumber isActive"
   );
 
   const valid = user?.password && (await bcrypt.compare(password, user.password));

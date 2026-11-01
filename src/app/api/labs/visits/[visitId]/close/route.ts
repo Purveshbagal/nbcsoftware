@@ -40,6 +40,7 @@ export async function PUT(
         notMetReason?: string;
         productsPromoted?: ProductPromoted[];
         samplesGiven?: SampleGiven[];
+        presentationsShown?: { presentationId: string; presentationTitle: string }[];
         callObjective?: string;
         remarks?: string;
         extraInfo?: string;
@@ -121,6 +122,15 @@ export async function PUT(
       visit.products = body.productsPromoted
         .filter((p) => p.isPrescribing)
         .map((p) => p.productName);
+    }
+
+    if (body.presentationsShown && Array.isArray(body.presentationsShown)) {
+      visit.presentationsShown = body.presentationsShown.map((p) => ({
+        presentationId: String(p.presentationId || ""),
+        presentationTitle: String(p.presentationTitle || ""),
+        shownAt: now,
+      }));
+      visit.presentationShown = visit.presentationsShown.length > 0;
     }
 
     if (body.samplesGiven && Array.isArray(body.samplesGiven)) {

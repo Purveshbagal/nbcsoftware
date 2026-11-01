@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   // Re-validate credentials
   const user = await UserModel.findOne({ username }).select(
-    "+password name mobileNumber role isActive"
+    "username password name mobileNumber role isActive"
   );
 
   const valid = user?.password && (await bcrypt.compare(password, user.password));

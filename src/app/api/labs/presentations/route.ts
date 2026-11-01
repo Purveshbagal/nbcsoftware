@@ -14,19 +14,11 @@ export async function GET(request: Request) {
     return auth.error;
   }
 
-  const { employee } = auth;
-
   await connectToDatabase();
 
-  // Fetch presentations assigned to this employee or their division
+  // Every active presentation the admin has created is available to show.
   const presentations = await PresentationModel.find({
     isActive: true,
-    $or: [
-      { assignedTo: employee.name },
-      { assignedToId: employee.employeeId },
-      { division: employee.division },
-      { assigningType: "Employee" }, // All employee presentations
-    ]
   })
     .sort({ date: -1, createdAt: -1 })
     .select("title description assigningType assignedTo division date coverImage slides")

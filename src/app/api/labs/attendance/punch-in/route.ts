@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { istDateKey, requireEmployee } from "@/lib/labs-auth";
 import { readJsonBody } from "@/lib/read-json";
+import { planLabel, readPlan, saveWorkPlan } from "@/lib/work-plan";
 import AttendanceModel from "@/models/Attendance";
 import EmployeeModel from "@/models/Employee";
 
@@ -28,6 +29,12 @@ export async function POST(request: Request) {
     );
   }
 
+  const parsedPlan = readPlan(body);
+  if ("error" in parsedPlan) {
+    return NextResponse.json({ error: parsedPlan.error }, { status: 400 });
+  }
+  const { plan } = parsedPlan;
+
   const date = istDateKey();
   const existing = await AttendanceModel.findOne({ employeeId: employee.employeeId, date });
   if (existing?.punchIn?.at) {
@@ -43,9 +50,9 @@ export async function POST(request: Request) {
         zone: employee.zone,
         division: employee.division,
         workAgenda: String(body?.workAgenda ?? "").trim(),
-        workLocation: String(body?.workLocation ?? "").trim(),
-        route: String(body?.route ?? "").trim(),
-        travelMode: String(body?.travelMode ?? "").trim(),
+        workLocation: planLabel(plan),
+        route: plan.workPlan === "outstation" ? planLabel(plan) : "",
+        travelMode: plan.travelMode ?? "",
         punchIn: { at: now, ...point, note: String(body?.note ?? "").trim() },
         status: "present",
       },
@@ -53,10 +60,18 @@ export async function POST(request: Request) {
     { upsert: true, returnDocument: "after" }
   ).lean();
 
+  const workPlan = await saveWorkPlan({
+    employee,
+    dateKey: date,
+    plan,
+    attendanceId: (item as { _id?: unknown } | null)?._id,
+    punchedInAt: now,
+  });
+
   await EmployeeModel.updateOne(
     { _id: employee.employeeId },
     { lastSeenAt: now, lastLocation: { ...point, at: now } }
   );
 
-  return NextResponse.json({ item }, { status: 201 });
+  return NextResponse.json({ item, workPlan }, { status: 201 });
 }

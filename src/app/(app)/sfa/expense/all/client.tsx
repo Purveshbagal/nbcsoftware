@@ -40,10 +40,10 @@ type Expense = {
   arrivalLocation: {
     lat: number;
     lng: number;
-    address: string;
-    area: string;
-    village: string;
-    district: string;
+    address?: string;
+    area?: string;
+    village?: string;
+    district?: string;
   } | null;
   travelTimeMinutes: number;
   travelAllowance: number;
@@ -298,7 +298,7 @@ export default function AllExpenseClient({ expenses }: { expenses: Expense[] }) 
                   </div>
 
                   {/* Arrival Information */}
-                  {selectedExpense.arrivalStatus === "arrived" && selectedExpense.arrivalLocation && (
+                  {selectedExpense.arrivalStatus === "arrived" && (
                     <>
                       <hr />
                       <div>
@@ -306,21 +306,53 @@ export default function AllExpenseClient({ expenses }: { expenses: Expense[] }) 
                           Arrival Information
                         </p>
                         <div className="space-y-2">
+                          {selectedExpense.punchedInAt && (
+                            <div className="flex items-start gap-2">
+                              <Clock className="mt-1 h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="font-medium">Started (Punch In)</p>
+                                <p className="text-muted-foreground text-sm">
+                                  {format(new Date(selectedExpense.punchedInAt), "dd MMM yyyy, hh:mm a")}
+                                </p>
+                              </div>
+                            </div>
+                          )}
                           <div className="flex items-start gap-2">
                             <MapPin className="mt-1 h-4 w-4 text-muted-foreground" />
                             <div>
-                              <p className="font-medium">Location</p>
-                              <p className="text-muted-foreground text-sm">
-                                {selectedExpense.arrivalLocation.area &&
-                                  `${selectedExpense.arrivalLocation.area}, `}
-                                {selectedExpense.arrivalLocation.village &&
-                                  `${selectedExpense.arrivalLocation.village}, `}
-                                {selectedExpense.arrivalLocation.district}
-                              </p>
-                              {selectedExpense.arrivalLocation.address && (
-                                <p className="text-muted-foreground text-sm">
-                                  {selectedExpense.arrivalLocation.address}
-                                </p>
+                              <p className="font-medium">Arrival Location</p>
+                              {selectedExpense.arrivalLocation ? (
+                                <>
+                                  {(selectedExpense.arrivalLocation.area ||
+                                    selectedExpense.arrivalLocation.village ||
+                                    selectedExpense.arrivalLocation.district) && (
+                                    <p className="text-muted-foreground text-sm">
+                                      {[
+                                        selectedExpense.arrivalLocation.area,
+                                        selectedExpense.arrivalLocation.village,
+                                        selectedExpense.arrivalLocation.district,
+                                      ]
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </p>
+                                  )}
+                                  {selectedExpense.arrivalLocation.address && (
+                                    <p className="text-muted-foreground text-sm">
+                                      {selectedExpense.arrivalLocation.address}
+                                    </p>
+                                  )}
+                                  <a
+                                    className="text-sm text-blue-600 underline"
+                                    href={`https://www.google.com/maps?q=${selectedExpense.arrivalLocation.lat},${selectedExpense.arrivalLocation.lng}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {selectedExpense.arrivalLocation.lat.toFixed(5)},{" "}
+                                    {selectedExpense.arrivalLocation.lng.toFixed(5)} · Open in Maps
+                                  </a>
+                                </>
+                              ) : (
+                                <p className="text-muted-foreground text-sm">Location not available</p>
                               )}
                             </div>
                           </div>
@@ -339,7 +371,7 @@ export default function AllExpenseClient({ expenses }: { expenses: Expense[] }) 
                             <div className="flex items-start gap-2">
                               <Clock className="mt-1 h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="font-medium">Travel Time</p>
+                                <p className="font-medium">Time Taken to Reach</p>
                                 <p className="text-muted-foreground text-sm">
                                   {Math.floor(selectedExpense.travelTimeMinutes / 60)}h{" "}
                                   {selectedExpense.travelTimeMinutes % 60}m

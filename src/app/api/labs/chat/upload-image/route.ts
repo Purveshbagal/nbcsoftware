@@ -19,7 +19,18 @@ export async function POST(request: NextRequest) {
 
     // Validate file type
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!validTypes.includes(file.type)) {
+    const byExtension: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      webp: "image/webp",
+    };
+    // Older app builds send gallery images as application/octet-stream.
+    const type =
+      file.type && file.type !== "application/octet-stream"
+        ? file.type
+        : byExtension[file.name.split(".").pop()?.toLowerCase() ?? ""] ?? file.type;
+    if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: "Invalid file type. Only JPEG, PNG, and WebP are allowed" },
         { status: 400 }

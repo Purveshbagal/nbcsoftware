@@ -7,6 +7,7 @@ import "package:url_launcher/url_launcher.dart";
 import "../app_theme.dart";
 import "../services/api_client.dart";
 import "../widgets/common.dart";
+import "presentations_shown_screen.dart";
 import "products_promoted_screen.dart";
 import "samples_given_screen.dart";
 
@@ -162,6 +163,14 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
     if (productsPromoted == null) return; // User cancelled
 
+    // Navigate to Presentations screen
+    if (!mounted) return;
+    final presentationsShown = await Navigator.of(context).push<List<Map<String, dynamic>>>(
+      MaterialPageRoute(builder: (_) => const PresentationsShownScreen()),
+    );
+
+    if (presentationsShown == null) return; // User cancelled
+
     // Navigate to Samples Given screen
     if (!mounted) return;
     final samplesGiven = await Navigator.of(context).push<List<Map<String, dynamic>>>(
@@ -187,6 +196,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
             children: [
               Text(
                 "Products Promoted: ${productsPromoted.length}\n"
+                "Presentations Shown: ${presentationsShown.length}\n"
                 "Samples Given: ${samplesGiven.length}",
                 style: const TextStyle(fontSize: 14),
               ),
@@ -226,6 +236,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
       final payload = {
         "metDoctor": true,
         "productsPromoted": productsPromoted,
+        "presentationsShown": presentationsShown,
         "samplesGiven": samplesGiven,
         "callObjective": closeDetails["objective"],
         "remarks": closeDetails["remarks"],

@@ -6,6 +6,7 @@ import EmployeeModel from "@/models/Employee";
 import ExpenseModel from "@/models/Expense";
 import HolidayModel from "@/models/Holiday";
 import LeaveModel from "@/models/Leave";
+import { istDayStart } from "@/lib/work-plan";
 import ReminderModel from "@/models/Reminder";
 import VisitModel from "@/models/Visit";
 
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
   const monthStart = `${today.slice(0, 8)}01`;
   const owner = { employeeName: employee.name };
 
-  const [profile, attendance, visitsToday, visitsMonth, presentDays, pendingLeaves, pendingExpenses, openReminders, nextHoliday] =
+  const [profile, attendance, visitsToday, visitsMonth, presentDays, pendingLeaves, pendingExpenses, openReminders, nextHoliday, workPlan] =
     await Promise.all([
       EmployeeModel.findById(employee.employeeId)
         .select("code name email contactNo designation division zone city state reportingTo dateOfJoin appUsername")
@@ -38,12 +39,14 @@ export async function GET(request: Request) {
       })
         .sort({ date: 1 })
         .lean(),
+      ExpenseModel.findOne({ employeeId: employee.employeeId, expenseDate: istDayStart(today) }).lean(),
     ]);
 
   return NextResponse.json({
     profile,
     today,
     attendance,
+    workPlan,
     stats: {
       visitsToday,
       visitsMonth,
