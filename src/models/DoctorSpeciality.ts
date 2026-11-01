@@ -19,7 +19,7 @@ const DoctorSpecialityModel =
   mongoose.model("DoctorSpeciality", doctorSpecialitySchema);
 
 // Auto-populate specialities on first connection
-const DEFAULT_SPECIALITIES = [
+export const DEFAULT_SPECIALITIES = [
   "General Physician", "General Medicine", "Internal Medicine", "Family Medicine", "General Surgeon",
   "Laparoscopic Surgeon", "Cardiologist", "Cardiac Surgeon", "Neurologist", "Neurosurgeon",
   "Orthopedic Surgeon", "Spine Surgeon", "Pediatrician", "Neonatologist", "Gynecologist",

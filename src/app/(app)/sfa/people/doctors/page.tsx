@@ -7,6 +7,10 @@ import {
 import { connectToDatabase } from "@/lib/mongodb";
 import { toPlainRows, type Column, type Field } from "@/lib/sfa-ui";
 import DoctorModel from "@/models/Doctor";
+import DoctorQualificationModel from "@/models/DoctorQualification";
+import DoctorSpecialityModel, { DEFAULT_SPECIALITIES } from "@/models/DoctorSpeciality";
+
+const doctorCategories = ["Important", "Super Important", "A"];
 
 const columns: Column[] = [
   { key: "name", label: "Doctor Name" },
@@ -18,20 +22,30 @@ const columns: Column[] = [
 export default async function DoctorsPage() {
   await connectToDatabase();
 
-  const [docs, masters] = await Promise.all([
+  const [docs, masters, qualifications, specialities] = await Promise.all([
     DoctorModel.find({}).sort({ createdAt: -1 }).lean(),
     loadMasterOptions([
-      "doctor-speciality",
-      "doctor-category",
-      "qualification",
       "state",
       "district",
       "taluka",
       "village",
     ]),
+    DoctorQualificationModel.find({ isActive: true })
+      .select("name")
+      .sort({ name: 1 })
+      .lean<{ name: string }[]>(),
+    DoctorSpecialityModel.find({ isActive: true })
+      .select("name")
+      .sort({ name: 1 })
+      .lean<{ name: string }[]>(),
   ]);
 
   const rows = toPlainRows(docs);
+  const qualificationOptions = qualifications.map(({ name }) => name);
+  const specialityOptions = [...new Set([
+    ...DEFAULT_SPECIALITIES,
+    ...specialities.map(({ name }) => name),
+  ])].sort((a, b) => a.localeCompare(b));
 
   const fields: Field[] = [
     // Basic Information (matching mobile-labs exactly)
@@ -43,21 +57,21 @@ export default async function DoctorsPage() {
       key: "qualification",
       label: "Qualification",
       type: "select",
-      options: masters.qualification,
+      options: qualificationOptions,
       section: "BASIC INFORMATION",
     },
     {
       key: "speciality",
       label: "Speciality",
       type: "select",
-      options: masters["doctor-speciality"],
+      options: specialityOptions,
       section: "BASIC INFORMATION",
     },
     {
       key: "category",
       label: "Category",
       type: "select",
-      options: masters["doctor-category"],
+      options: doctorCategories,
       section: "BASIC INFORMATION",
     },
     {
@@ -129,8 +143,8 @@ export default async function DoctorsPage() {
         createFields={createFields}
         detailHref="/sfa/people/doctors"
         filters={[
-          { key: "speciality", label: "Speciality", options: masters["doctor-speciality"] },
-          { key: "category", label: "Category", options: masters["doctor-category"] },
+          { key: "speciality", label: "Speciality", options: specialityOptions },
+          { key: "category", label: "Category", options: doctorCategories },
           { key: "city", label: "City", options: distinctValues(rows, "city") },
         ]}
       />

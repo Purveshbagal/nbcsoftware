@@ -41,6 +41,25 @@ export async function POST(request: Request) {
     );
   }
 
+  if (mobileNumber !== undefined && typeof mobileNumber !== "string") {
+    return NextResponse.json(
+      { error: "Mobile number must be a 10-digit number" },
+      { status: 400 }
+    );
+  }
+
+  const normalizedMobileNumber = mobileNumber?.trim() ?? "";
+  if (
+    mobileNumber !== undefined &&
+    normalizedMobileNumber !== "" &&
+    !/^[0-9]{10}$/.test(normalizedMobileNumber)
+  ) {
+    return NextResponse.json(
+      { error: "Mobile number must be a 10-digit number" },
+      { status: 400 }
+    );
+  }
+
   if (budgetLimit !== undefined && (isNaN(Number(budgetLimit)) || Number(budgetLimit) < 0)) {
     return NextResponse.json(
       { error: "Budget limit must be a valid positive number" },
@@ -62,25 +81,22 @@ export async function POST(request: Request) {
 
   const hashed = await bcrypt.hash(password, 10);
 
-  const userData: any = {
+  const userData = {
     username: normalizedUsername,
     name,
     password: hashed,
-    role: "field",
+    role: "field" as const,
+    ...(normalizedMobileNumber ? { mobileNumber: normalizedMobileNumber } : {}),
+    ...(budgetLimit !== undefined && budgetLimit !== ""
+      ? {
+          budgetLimit: {
+            totalLimit: Number(budgetLimit),
+            spentAmount: 0,
+            availableAmount: Number(budgetLimit),
+          },
+        }
+      : {}),
   };
-
-  if (mobileNumber) {
-    userData.mobileNumber = mobileNumber.trim();
-  }
-
-  if (budgetLimit !== undefined && budgetLimit !== "") {
-    const limitAmount = Number(budgetLimit);
-    userData.budgetLimit = {
-      totalLimit: limitAmount,
-      spentAmount: 0,
-      availableAmount: limitAmount,
-    };
-  }
 
   const user = await UserModel.create(userData);
 

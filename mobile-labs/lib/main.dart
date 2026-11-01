@@ -63,9 +63,13 @@ class _BootstrapState extends State<_Bootstrap> {
   @override
   void initState() {
     super.initState();
-    ApiClient.instance.onUnauthorized = () {
+    ApiClient.instance.onUnauthorized = (message) {
       if (_session == null) return;
-      _signOut(message: "You have been signed out. Sign in again, or contact your administrator.");
+      _signOut(
+        message: message == "Unauthorized"
+            ? "You have been signed out because the server rejected your session. Sign in again, or contact your administrator."
+            : "You have been signed out: $message",
+      );
     };
     _start();
   }
