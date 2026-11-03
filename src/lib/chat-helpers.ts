@@ -169,13 +169,17 @@ export async function createBirthdayMessage(
 
 export async function createDailyTeamMessage(
   type: "good_morning" | "good_night",
-  dateKey = getIndiaDateKey()
+  dateKey = getIndiaDateKey(),
+  // Only a message created at or after this moment counts as "already sent",
+  // so a stray earlier message for the same date can't block the real one.
+  sentAfter?: Date
 ) {
   const teamChat = await getOrCreateTeamChat();
   const existingMessage = await ChatMessageModel.findOne({
     conversationId: teamChat._id,
     systemMessageType: type,
     systemMessageDate: dateKey,
+    ...(sentAfter ? { createdAt: { $gte: sentAfter } } : {}),
   });
 
   if (existingMessage) return null;
