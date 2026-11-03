@@ -104,25 +104,10 @@ export default function EmployeePerformanceReport({ employees }: { employees: Em
     return "text-red-600";
   }
 
-  function renderCandleChart(data: PerformanceData) {
-    const score = data.performanceScore;
-    const height = Math.max(20, (score / 100) * 60);
-
-    return (
-      <div className="flex items-end justify-center h-16">
-        <div
-          className={`w-8 rounded-t ${
-            score >= 80
-              ? "bg-green-500"
-              : score >= 50
-              ? "bg-yellow-500"
-              : "bg-red-500"
-          }`}
-          style={{ height: `${height}px` }}
-          title={`Performance: ${score}%`}
-        />
-      </div>
-    );
+  function getPerformanceBarColor(score: number): string {
+    if (score >= 80) return "bg-green-500";
+    if (score >= 50) return "bg-yellow-500";
+    return "bg-red-500";
   }
 
   return (
@@ -205,14 +190,13 @@ export default function EmployeePerformanceReport({ employees }: { employees: Em
                 <TableHead className="text-center">Present</TableHead>
                 <TableHead className="text-center">Work Plan</TableHead>
                 <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-center">Performance</TableHead>
                 <TableHead className="text-center">Trend</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-muted-foreground h-32 text-center">
+                  <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
                     No performance data found
                   </TableCell>
                 </TableRow>
@@ -247,9 +231,6 @@ export default function EmployeePerformanceReport({ employees }: { employees: Em
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      {renderCandleChart(row)}
-                    </TableCell>
-                    <TableCell className="text-center">
                       {row.performanceTrend === "up" && (
                         <TrendingUp className="text-green-600 mx-auto size-5" />
                       )}
@@ -265,6 +246,43 @@ export default function EmployeePerformanceReport({ employees }: { employees: Em
               )}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {/* Performance Graph */}
+      {!loading && (
+        <div className="rounded-xl border p-4">
+          <h2 className="mb-1 text-lg font-semibold">Performance Graph</h2>
+          <p className="text-muted-foreground mb-4 text-sm">
+            Performance score (0-100%) of each employee for the selected period.
+          </p>
+          {filtered.length === 0 && (
+            <div className="text-muted-foreground flex h-40 items-center justify-center text-sm">
+              No performance data to show
+            </div>
+          )}
+          <div className="flex items-end gap-6 overflow-x-auto pb-2">
+            {filtered.map((row) => (
+              <div
+                key={row.employeeId}
+                className="flex w-20 shrink-0 flex-col items-center gap-2"
+              >
+                <span className={`text-sm font-semibold ${getPerformanceColor(row.performanceScore)}`}>
+                  {row.performanceScore}%
+                </span>
+                <div className="bg-muted flex h-40 w-10 items-end overflow-hidden rounded-t">
+                  <div
+                    className={`w-full rounded-t ${getPerformanceBarColor(row.performanceScore)}`}
+                    style={{ height: `${Math.min(100, Math.max(0, row.performanceScore))}%` }}
+                    title={`${row.employeeName}: ${row.performanceScore}%`}
+                  />
+                </div>
+                <span className="w-full truncate text-center text-xs" title={row.employeeName}>
+                  {row.employeeName}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
