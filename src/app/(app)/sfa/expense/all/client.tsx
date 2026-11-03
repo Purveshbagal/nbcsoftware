@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
+import { format as formatDate } from "date-fns";
 import { MapPin, Clock, Navigation } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,12 @@ type Expense = {
   paymentStatus: string;
   punchedInAt: string | null;
 };
+
+// Never throw on a missing/invalid date; a RangeError here crashes the whole page.
+function format(value: string | Date, pattern: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : formatDate(date, pattern);
+}
 
 export default function AllExpenseClient({ expenses }: { expenses: Expense[] }) {
   const [searchTerm, setSearchTerm] = useState("");

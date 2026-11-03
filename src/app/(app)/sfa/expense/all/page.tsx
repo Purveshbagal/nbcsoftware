@@ -32,7 +32,18 @@ export default async function AllExpensePage() {
     travelMode: exp.travelMode || "",
     arrivalStatus: exp.arrivalStatus || "not-arrived",
     arrivedAt: exp.arrivedAt?.toISOString() || null,
-    arrivalLocation: exp.arrivalLocation || null,
+    arrivalLocation:
+      typeof exp.arrivalLocation?.lat === "number" &&
+      typeof exp.arrivalLocation?.lng === "number"
+        ? {
+            lat: exp.arrivalLocation.lat,
+            lng: exp.arrivalLocation.lng,
+            address: exp.arrivalLocation.address || "",
+            area: exp.arrivalLocation.area || "",
+            village: exp.arrivalLocation.village || "",
+            district: exp.arrivalLocation.district || "",
+          }
+        : null,
     travelTimeMinutes: exp.travelTimeMinutes || 0,
     travelAllowance: exp.travelAllowance || 0,
     workPlanAllowance: exp.workPlanAllowance || 0,
