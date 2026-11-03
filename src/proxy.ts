@@ -48,5 +48,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Public image assets (e.g. /cartoon.webp, the chat system avatar) must load
+  // without a session, since the mobile app fetches them directly.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:webp|png|jpg|jpeg|svg|gif|ico)$).*)",
+  ],
 };
